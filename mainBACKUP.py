@@ -1,9 +1,7 @@
 from Coach import Coach
-# from othello.OthelloGame import OthelloGame as Game
-from chinese_checkers.ChineseCheckersGame import ChineseCheckersGame as Game
+from othello.OthelloGame import OthelloGame as Game
 #from othello.pytorch.NNet import NNetWrapper as nn
-# from othello.tensorflow.NNet import NNetWrapper as nn
-from chinese_checkers.tensorflow.NNet import NNetWrapper as nn
+from othello.tensorflow.NNet import NNetWrapper as nn
 from utils import *
 
 args = dotdict({
@@ -24,7 +22,7 @@ args = dotdict({
 })
 
 if __name__=="__main__":
-    g = Game()
+    g = Game(6)
     nnet = nn(g)
 
     if args.load_model:

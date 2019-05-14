@@ -1,4 +1,4 @@
-import Arena
+import ArenaBCKUP
 from MCTS import MCTS
 from othello.OthelloGame import OthelloGame, display
 from othello.OthelloPlayers import *
@@ -33,5 +33,5 @@ n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 #mcts2 = MCTS(g, n2, args2)
 #n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
 
-arena = Arena.Arena(n1p, hp, g, display=display)
+arena = ArenaBCKUP.Arena(n1p, hp, g, display=display)
 print(arena.playGames(2, verbose=True))

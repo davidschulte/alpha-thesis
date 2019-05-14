@@ -68,18 +68,14 @@ class MCTS():
         s = self.game.stringRepresentation(canonicalBoard)
 
         if s not in self.Es:
-            scores = self.game.getGameEnded(canonicalBoard, 1)
-            if scores is not None:
-                self.Es[s] = scores[0]
-            else:
-                self.Es[s] = 0
+            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s]!=0:
             # terminal node
-            return scores[2]
+            return -self.Es[s]
 
         if s not in self.Ps:
             # leaf node
-            self.Ps[s], scores = self.nnet.predict(canonicalBoard)
+            self.Ps[s], v = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
@@ -96,7 +92,7 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
-            return scores[2]
+            return -v
 
         valids = self.Vs[s]
         cur_best = -float('inf')
@@ -118,15 +114,15 @@ class MCTS():
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        scores = self.search(next_s)
+        v = self.search(next_s)
 
         if (s,a) in self.Qsa:
-            self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + scores[0])/(self.Nsa[(s,a)]+1)
+            self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + v)/(self.Nsa[(s,a)]+1)
             self.Nsa[(s,a)] += 1
 
         else:
-            self.Qsa[(s,a)] = scores[0]
+            self.Qsa[(s,a)] = v
             self.Nsa[(s,a)] = 1
 
         self.Ns[s] += 1
-        return scores[2]
+        return -v
