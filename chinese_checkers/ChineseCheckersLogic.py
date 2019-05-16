@@ -11,9 +11,9 @@ RIGHT_UP = 4
 LEFT_DOWN = 5
 RIGHT_DOWN = 6
 
-GOLD = 3;
-SILVER = 1;
-BRONZE = 0;
+GOLD = 3
+SILVER = 1
+BRONZE = 0
 
 PRIZES = [GOLD, SILVER, BRONZE]
 
@@ -166,15 +166,15 @@ class Board():
                 neighbors.append((yN, xN, valN, dir))
         return neighbors
 
-    def get_reachables(self, y, x, reachables=[], jumping=False):
-        neighbors = self.get_neighbors(y, x, self.np_pieces)
+    def get_reachables(self, y, x, board, reachables=[], jumping=False):
+        neighbors = self.get_neighbors(y, x, board)
         if jumping:
             for (yN, xN, valN, dir) in neighbors:
                 if valN not in [EMPTY, OUT]:
-                    (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, self.np_pieces)
+                    (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
                     if (yNN, xNN) not in reachables and valNN == EMPTY:
                         reachables.append((yNN, xNN))
-                        reachables = list(set().union(reachables, self.get_reachables(yNN, xNN, self.np_pieces, reachables, True)))
+                        reachables = list(set().union(reachables, self.get_reachables(yNN, xNN, board, reachables, True)))
         else:
             for (yN, xN, valN, _) in neighbors:
                 if valN == EMPTY:
@@ -187,10 +187,10 @@ class Board():
         self.np_pieces[start_coordinates[0], start_coordinates[1]] = EMPTY
         self.np_pieces[end_coordinates[0], end_coordinates[1]] = player
 
-    def get_done(self, player):
-        return False not in (self.np_pieces[END == player] == player)
+    def get_done(self, board, player):
+        return False not in (board[END == player] == player)
 
-    def get_win_state(self):
+    def get_win_state(self, board):
         still_playing = []
         for player in [1,2,3]:
             if self.scores[player - 1] == 0:
@@ -198,7 +198,8 @@ class Board():
 
         prize = PRIZES[-len(still_playing)]
         for player in still_playing:
-            if False not in (self.get_done(player)):
+            test = self.get_done(board, player)
+            if self.get_done(board, player):
                 self.scores[player - 1] = prize
                 still_playing.remove(player)
 
@@ -212,12 +213,12 @@ class Board():
     def get_next_player(self,player):
         return player % 3 + 1
 
-    def get_legal_moves(self, player):
+    def get_legal_moves(self, board, player):
         legal_moves = [];
-        player_y_list, player_x_list = np.where(self.np_pieces == player)
+        player_y_list, player_x_list = np.where(board == player)
         for i in range(len(player_y_list)):
             y_start, x_start = (player_y_list[i], player_x_list[i])
-            reachables = self.get_reachables(y_start, x_start)
+            reachables = self.get_reachables(y_start, x_start, board)
             for y_end, x_end in reachables:
                 legal_moves.append((y_start, x_start, y_end, x_end))
         return legal_moves
@@ -227,14 +228,29 @@ class Board():
         return y_coordinates[coded], x_coordinates[coded]
 
     def encode_coordinates(self, y, x):
-        (x_coordinates, y_coordinates) = np.where(START != OUT)
+        (y_coordinates, x_coordinates) = np.where(START != OUT)
         y_fits = np.where(y_coordinates == y)
         x_fits = np.where(x_coordinates == x)
         index_list = np.intersect1d(y_fits, x_fits)
         return index_list[0]
 
-    def encode_board(self, board):
-        return board[board != OUT]
+    def rotate_board(self, board, player):
+        if player == 1:
+            return board
+
+        if player == 2:
+            reference_board = PLAYER2Board
+        else:
+            reference_board = PLAYER3Board
+
+        rotated_board = np.copy(board)
+        for i in range(121):
+            rotated_board[PLAYER1Board == i+1] = board[reference_board == i+1]
+
+        return rotated_board
+
+    # def encode_board(self, board):
+    #     return board[board != OUT]
 
     # def get_end_by_player(self, player):
     #     end_board = np.copy(END)

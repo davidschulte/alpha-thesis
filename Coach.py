@@ -122,14 +122,22 @@ class Coach():
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
             scores = arena.playGames(self.args.arenaCompare)
 
-            print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            if pwins+nwins == 0 or float(nwins)/(pwins+nwins) < self.args.updateThreshold:
+            # print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+            # if pwins+nwins == 0 or float(nwins)/(pwins+nwins) < self.args.updateThreshold:
+            #     print('REJECTING NEW MODEL')
+            #     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            # else:
+            #     print('ACCEPTING NEW MODEL')
+            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+
+            if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
                 print('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
                 print('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')                
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.pth.tar'

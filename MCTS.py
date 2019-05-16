@@ -68,7 +68,7 @@ class MCTS():
         s = self.game.stringRepresentation(canonicalBoard)
 
         if s not in self.Es:
-            scores = self.game.getGameEnded(canonicalBoard, 1)
+            scores = self.game.getGameEnded(canonicalBoard)
             if scores is not None:
                 self.Es[s] = scores[0]
             else:

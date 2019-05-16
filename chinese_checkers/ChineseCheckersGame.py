@@ -22,7 +22,7 @@ class ChineseCheckersGame(Game):
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return 17,13
+        return 13, 17
 
     def getActionSize(self):
         """
@@ -67,17 +67,18 @@ class ChineseCheckersGame(Game):
                         0 for invalid moves
         """
         valids = [0]*self.getActionSize()
-        if board.get_done(player):
+        b = Board()
+        if b.get_done(board, player):
             valids[-1] = 1
             return valids
-        for y_start, x_start, y_end, x_end in board.get_legal_moves(player):
-            start = board.encode_coordinates(y_start, x_start)
-            end = board.encode_coordinates(y_end, x_end)
+        for y_start, x_start, y_end, x_end in b.get_legal_moves(board, player):
+            start = b.encode_coordinates(y_start, x_start)
+            end = b.encode_coordinates(y_end, x_end)
             valids[start*121+end] = 1
         return valids
 
 
-    def getGameEnded(self, board, player):
+    def getGameEnded(self, board):
         """
         Input:
             board: current board
@@ -88,7 +89,8 @@ class ChineseCheckersGame(Game):
                small non-zero value for draw.
 
         """
-        ended, scores = board.get_win_state(player)
+        b = Board()
+        ended, scores = b.get_win_state(board)
         if(ended):
             return scores
         return None
@@ -107,14 +109,23 @@ class ChineseCheckersGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
+        # b = Board()
+        # canonical_board = b.encode_board(board)
+        # old_board = np.copy(canonical_board)
+        # shift = player - 1
+        # for p in [1,2,3]:
+        #     canonical_board[old_board == p] = (p + shift) % 3
+        #
+        # return canonical_board
         b = Board()
-        canonical_board = b.encode_board(board)
-        old_board = np.copy(canonical_board)
+        canonical_board = np.copy(board)
         shift = player - 1
         for p in [1,2,3]:
-            canonical_board[old_board == p] = (p + shift) % 3
+            canonical_board[board == p] = (p + shift) % 3
 
-        return canonical_board
+        return b.rotate_board(canonical_board, player)
+
+
 
     def getSymmetries(self, board, pi):
         """
@@ -127,7 +138,7 @@ class ChineseCheckersGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        return []
+        return [(board, pi)]
 
     def stringRepresentation(self, board):
         """
@@ -138,5 +149,4 @@ class ChineseCheckersGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        b = Board()
-        return b.encode_board(board).tostring()
+        return board.tostring()
