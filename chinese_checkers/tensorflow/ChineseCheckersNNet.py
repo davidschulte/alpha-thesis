@@ -35,7 +35,8 @@ class ChineseCheckersNNet():
             s_fc2 = Dropout(Relu(BatchNormalization(Dense(s_fc1, 512, use_bias=False), axis=1, training=self.isTraining)), rate=self.dropout)         # batch_size x 512
             self.pi = Dense(s_fc2, self.action_size)                                                        # batch_size x self.action_size
             self.prob = tf.nn.softmax(self.pi)
-            self.v = Tanh(Dense(s_fc2, 1))                                                               # batch_size x 1
+            # self.v = Tanh(Dense(s_fc2, 1))                                                               # batch_size x 1
+            self.v = Dense(s_fc2,3)
 
             self.calculate_loss()
 

@@ -67,15 +67,12 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
+        scores = self.game.getGameEnded(canonicalBoard)
         if s not in self.Es:
-            scores = self.game.getGameEnded(canonicalBoard)
-            if scores is not None:
-                self.Es[s] = scores[0]
-            else:
-                self.Es[s] = 0
-        if self.Es[s]!=0:
+            self.Es[s] = scores
+        if self.Es[s] != [0, 0, 0]:
             # terminal node
-            return scores[2]
+            return [scores[2], scores[0], scores[1]]
 
         if s not in self.Ps:
             # leaf node
@@ -96,7 +93,7 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
-            return scores[2]
+            return [scores[2], scores[0], scores[1]]
 
         valids = self.Vs[s]
         cur_best = -float('inf')
@@ -129,4 +126,4 @@ class MCTS():
             self.Nsa[(s,a)] = 1
 
         self.Ns[s] += 1
-        return scores[2]
+        return [scores[2], scores[0], scores[1]]

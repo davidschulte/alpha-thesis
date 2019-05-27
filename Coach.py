@@ -56,7 +56,7 @@ class Coach():
             action = np.random.choice(len(pi), p=pi)
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
-            scores = self.game.getGameEnded(board, self.curPlayer)
+            scores = self.game.getGameEnded(board)
 
             if scores is not None:
                 return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]

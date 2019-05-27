@@ -1,4 +1,3 @@
-#!/opt/python/python-3.6/i/bin/python
 
 from Coach import Coach
 # from othello.OthelloGame import OthelloGame as Game

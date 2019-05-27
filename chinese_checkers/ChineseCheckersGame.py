@@ -2,6 +2,7 @@ from Game import Game
 from .ChineseCheckersLogic import Board
 import numpy as np
 
+
 class ChineseCheckersGame(Game):
 
     def __init__(self):
@@ -22,14 +23,14 @@ class ChineseCheckersGame(Game):
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return 13, 17
+        return 17, 17
 
     def getActionSize(self):
         """
         Returns:
             actionSize: number of all possible actions
         """
-        return 121*121+1
+        return 81*6+25*25+2*20*20+16*16+1
 
     def getNextState(self, board, player, action):
         """
@@ -44,16 +45,15 @@ class ChineseCheckersGame(Game):
         """
         # if player takes action on board, return next (board,player)
         # action must be a valid move
-        if action == self.getActionSize() - 1:
-            return board, board.get_next_player(player)
         b = Board()
+        if action == self.getActionSize() - 1:
+            return board, b.get_next_player(player)
+        b = Board()
+        y_start, x_start, y_end, x_end = b.decode_move(action)
         b.np_pieces = np.copy(board)
-        move = (int(action/121), action%121)
-        y_start, x_start = board.decode_coordinates(move[0])
-        y_end, x_end = board.decode_coordinates(move[1])
         b.move((y_start, x_start), (y_end, x_end), player)
 
-        return b.np_pieces, board.get_next_player(player)
+        return b.np_pieces, b.get_next_player(player)
 
     def getValidMoves(self, board, player):
         """
@@ -71,10 +71,15 @@ class ChineseCheckersGame(Game):
         if b.get_done(board, player):
             valids[-1] = 1
             return valids
-        for y_start, x_start, y_end, x_end in b.get_legal_moves(board, player):
-            start = b.encode_coordinates(y_start, x_start)
-            end = b.encode_coordinates(y_end, x_end)
-            valids[start*121+end] = 1
+
+        legal_moves_direct, legal_moves_jumping = b.get_legal_moves(board, player)
+
+        for y_start, x_start, direction in legal_moves_direct:
+            valids[b.encode_move_direct(y_start, x_start, direction)] = 1
+
+        for y_start, x_start, y_end, x_end in legal_moves_jumping:
+            valids[b.encode_move_jumping(y_start, x_start, y_end, x_end)] = 1
+
         return valids
 
 
@@ -93,7 +98,7 @@ class ChineseCheckersGame(Game):
         ended, scores = b.get_win_state(board)
         if(ended):
             return scores
-        return None
+        return [0, 0, 0]
 
     def getCanonicalForm(self, board, player):
         """
@@ -117,11 +122,20 @@ class ChineseCheckersGame(Game):
         #     canonical_board[old_board == p] = (p + shift) % 3
         #
         # return canonical_board
+        if player == 1:
+            return board
+
         b = Board()
         canonical_board = np.copy(board)
-        shift = player - 1
-        for p in [1,2,3]:
-            canonical_board[board == p] = (p + shift) % 3
+        players = [1, 2, 3]
+        if player == 2:
+            new_players = [3, 1, 2]
+        else:
+            new_players = [2, 3, 1]
+
+
+        for p in range(len(players)):
+            canonical_board[board == players[p]] = new_players[p]
 
         return b.rotate_board(canonical_board, player)
 
