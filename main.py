@@ -6,6 +6,11 @@ from chinese_checkers.ChineseCheckersGame import ChineseCheckersGame as Game
 # from othello.tensorflow.NNet import NNetWrapper as nn
 from chinese_checkers.tensorflow.NNet import NNetWrapper as nn
 from utils import *
+import numpy as np
+import sys
+
+np.set_printoptions(threshold=sys.maxsize)
+
 
 args = dotdict({
     'numIters': 1000,

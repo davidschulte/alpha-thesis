@@ -96,7 +96,7 @@ class ChineseCheckersGame(Game):
         """
         b = Board()
         ended, scores = b.get_win_state(board)
-        if(ended):
+        if ended:
             return scores
         return [0, 0, 0]
 

@@ -40,7 +40,12 @@ class MCTS():
             probs[bestA]=1
             return probs
 
-        counts = [x**(1./temp) for x in counts]
+        # counts = [x**(1./temp) for x in counts]
+        for x in counts:
+            if x > 0:
+                print(x)
+        debug = sum(counts)
+        debug2 = self.Nsa
         probs = [x/float(sum(counts)) for x in counts]
         return probs
 

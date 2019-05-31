@@ -97,7 +97,23 @@ GRID = np.array([(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0), #0
                  (0, 0, 0, 0, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0), #15
                  (0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]) #16
 
-
+ROTATION_LEFT = [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 204,   0,   0,   0,   0,
+                   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 205, 188,   0,   0,   0,   0,
+                   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 206, 189, 172,   0,   0,   0,   0,
+                   0,   0,   0,   0,   0,   0,   0,   0,   0, 207, 190, 173, 156,   0,   0,   0,   0,
+                   0,   0,   0,   0, 276, 259, 242, 225, 208, 191, 174, 157, 140, 123, 106,  89,  72,
+                   0,   0,   0,   0, 260, 243, 226, 209, 192, 175, 158, 141, 124, 107,  90,  73,   0,
+                   0,   0,   0,   0, 244, 227, 210, 193, 176, 159, 142, 125, 108,  91,  74,   0,   0,
+                   0,   0,   0,   0, 228, 211, 194, 177, 160, 143, 126, 109,  92,  75,   0,   0,   0,
+                   0,   0,   0,   0, 212, 195, 178, 161, 144, 127, 110,  93,  76,   0,   0,   0,   0,
+                   0,   0,   0, 213, 196, 179, 162, 145, 128, 111,  94,  77,  60,   0,   0,   0,   0,
+                   0,   0, 214, 197, 180, 163, 146, 129, 112,  95,  78,  61,  44,   0,   0,   0,   0,
+                   0, 215, 198, 181, 164, 147, 130, 113,  96,  79,  62,  45,  28,   0,   0,   0,   0,
+                 216, 199, 182, 165, 148, 131, 114,  97,  80,  63,  46,  29,  12,   0,   0,   0,   0,
+                   0,   0,   0,   0, 132, 115,  98,  81,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                   0,   0,   0,   0, 116,  99,  82,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                   0,   0,   0,   0, 100,  83,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                   0,   0,   0,   0,  84,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0]
 
 
 # # 0   1   2   3   4   5   6   7   8   9  10  11  12
@@ -156,9 +172,9 @@ class Board():
             return 0, 0, OUT
         if y == HEIGHT - 1 and dir in [LEFT_DOWN, RIGHT_DOWN]:
             return 0, 0, OUT
-        if x == 0 and dir in [LEFT, LEFT_UP, LEFT_DOWN]:
+        if x == 0 and dir in [LEFT, LEFT_DOWN]:
             return 0, 0, OUT
-        if x == WIDTH - 1 and dir in [RIGHT, RIGHT_UP, RIGHT_DOWN]:
+        if x == WIDTH - 1 and dir in [RIGHT, RIGHT_UP]:
             return 0, 0, OUT
 
         yN, xN = y+MOVES[dir][0], x+MOVES[dir][1]
@@ -182,17 +198,17 @@ class Board():
         reachables = [];
         neighbors = self.get_neighbors(y, x, board)
         for (yN, xN, valN, dirN) in neighbors:
-            if valN == EMPTY:
+            if valN == EMPTY and (END[y, x] != 1 or END[yN, xN] == 1):
                 reachables.append((yN, xN, dirN))
 
         return reachables
 
     def get_reachables_jump(self, y, x, board, reachables=[]):
         neighbors = self.get_neighbors(y, x, board)
-        for (yN, xN, valN, dir) in neighbors:
-            if valN not in [EMPTY, OUT]:
+        for yN, xN, valN, dir in neighbors:
+            if valN != EMPTY:
                 (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
-                if (yNN, xNN) not in reachables and valNN == EMPTY:
+                if (yNN, xNN) not in reachables and valNN == EMPTY and (END[y, x] != 1 or END[yNN, xNN] == 1):
                     reachables.append((yNN, xNN))
                     reachables = list(set().union(reachables, self.get_reachables_jump(yNN, xNN, board, reachables)))
 
@@ -260,7 +276,7 @@ class Board():
         for i in range(len(player_y_list)):
             y_start, x_start = (player_y_list[i], player_x_list[i])
             reachables_direct = self.get_reachables_direct(y_start, x_start, board)
-            reachables_jumping = self.get_reachables_jump(y_start, x_start, board)
+            reachables_jumping = self.get_reachables_jump(y_start, x_start, board, [])
             for (_, _, dir) in reachables_direct:
                 legal_moves_direct.append((y_start, x_start, dir))
 
@@ -277,9 +293,12 @@ class Board():
 
     def encode_move_jumping(self, y_start, x_start, y_end, x_end):
         grid_no, start = self.encode_coordinates_grid(y_start, x_start)
-        _, end = self.encode_coordinates_grid(y_end, x_end)
+        grid_nu, end = self.encode_coordinates_grid(y_end, x_end)
 
-        return sum(ACTION_SIZE_OFFSET[0:grid_no])+start*ACTION_SUB_SPACE[grid_no]+end
+        encoded = sum(ACTION_SIZE_OFFSET[0:grid_no])-1+start*ACTION_SUB_SPACE[grid_no]+end
+        if encoded >= 81*6+25*25+2*20*20+16*16+1 or grid_no != grid_nu:
+            print("DEBUG")
+        return sum(ACTION_SIZE_OFFSET[0:grid_no])-1+start*ACTION_SUB_SPACE[grid_no]+end
 
     # def decode_coordinates(self, coded):
     #     (x_coordinates, y_coordinates) = np.where(START != OUT)
@@ -332,10 +351,11 @@ class Board():
         return grid_no, index_list[0]
 
     def rotate_board(self, board, player):
+        board = board.reshape(17*17)
         for _ in range(player - 1):
             board = self.rotate_left(board)
 
-        return board
+        return board.reshape(17, 17)
         # rotated_board = np.copy(board)
         # for i in range(121):
         #     rotated_board[PLAYER1Board == i+1] = board[reference_board == i+1]
@@ -343,7 +363,12 @@ class Board():
         # return rotated_board
 
     def rotate_left(self, board):
-        return board
+        rotated_board = START.reshape(17*17)
+        for i in range(len(board)):
+            if board[i] != OUT:
+                rotated_board[ROTATION_LEFT[i]] = board[i]
+
+        return rotated_board
 
     # def encode_board(self, board):
     #     return board[board != OUT]
