@@ -6,6 +6,7 @@ from pytorch_classification.utils import Bar, AverageMeter
 import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
+import time
 
 
 class Coach():
@@ -15,12 +16,14 @@ class Coach():
     """
     def __init__(self, game, nnet, args):
         self.game = game
+        self.board = self.game.getInitBoard()
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []    # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
+        self.curPlayer = 1
 
     def executeEpisode(self):
         """
@@ -39,13 +42,20 @@ class Coach():
                            the player eventually won the game, else -1.
         """
         trainExamples = []
-        board = self.game.getInitBoard()
+        self.board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
 
+        start_time = time.time()
         while True:
             episodeStep += 1
-            canonicalBoard = self.game.getCanonicalForm(board,self.curPlayer)
+
+            if episodeStep % 20 == 0:
+                end_time = time.time()
+                print(end_time-start_time)
+                start_time = end_time
+
+            canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
             temp = int(episodeStep < self.args.tempThreshold)
 
             pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
@@ -54,11 +64,11 @@ class Coach():
                 trainExamples.append([b, self.curPlayer, p, None])
 
             action = np.random.choice(len(pi), p=pi)
-            board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
+            self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
-            scores = self.game.getGameEnded(board)
+            scores = self.game.getGameEnded(self.board)
 
-            if scores is not None:
+            if scores != [0, 0, 0]:
                 return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
 
     def learn(self):

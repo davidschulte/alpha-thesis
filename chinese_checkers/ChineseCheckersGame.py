@@ -50,8 +50,15 @@ class ChineseCheckersGame(Game):
             return board, b.get_next_player(player)
         b = Board()
         y_start, x_start, y_end, x_end = b.decode_move(action)
+
         b.np_pieces = np.copy(board)
+        if player != 1:
+            b.np_pieces = b.rotate_board(b.np_pieces, 1, player)
+
         b.move((y_start, x_start), (y_end, x_end), player)
+
+        if player != 1:
+            b.np_pieces = b.rotate_board(b.np_pieces, player, 1)
 
         return b.np_pieces, b.get_next_player(player)
 
@@ -126,7 +133,7 @@ class ChineseCheckersGame(Game):
             return board
 
         b = Board()
-        canonical_board = np.copy(board)
+        rotation_board = np.copy(board)
         players = [1, 2, 3]
         if player == 2:
             new_players = [3, 1, 2]
@@ -135,9 +142,9 @@ class ChineseCheckersGame(Game):
 
 
         for p in range(len(players)):
-            canonical_board[board == players[p]] = new_players[p]
+            rotation_board[board == players[p]] = new_players[p]
 
-        return b.rotate_board(canonical_board, player)
+        return b.rotate_board(rotation_board, 1, player)
 
 
 
