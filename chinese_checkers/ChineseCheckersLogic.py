@@ -243,7 +243,7 @@ class Board():
         encoded = sum(ACTION_SIZE_OFFSET[0:grid_no]) - 1 + start * ACTION_SUB_SPACE[grid_no] + end
         # if encoded >= 81 * 6 + 25 * 25 + 2 * 20 * 20 + 16 * 16 + 1 or grid_no != grid_nu or encoded == 1485:
         #     print("DEBUG")
-        return sum(ACTION_SIZE_OFFSET[0:grid_no]) - 1 + start * ACTION_SUB_SPACE[grid_no] + end
+        return sum(ACTION_SIZE_OFFSET[0:grid_no]) + start * ACTION_SUB_SPACE[grid_no] + end
 
     # def decode_coordinates(self, coded):
     #     (x_coordinates, y_coordinates) = np.where(START != OUT)
@@ -265,7 +265,7 @@ class Board():
             y_end, x_end = y_start + MOVES[direction][0], x_start + MOVES[direction][1]
         else:
             y_start, x_start = self.decode_coordinates_grid(start_position, grid)
-            y_end, x_end = self.decode_coordinates_grid(direction + 1, grid)
+            y_end, x_end = self.decode_coordinates_grid(direction, grid)
 
         return y_start, x_start, y_end, x_end
 
@@ -333,3 +333,5 @@ class Board():
     #         end_board[END == p] = (p + shift) % 3
     #
     #     return end_board
+
+
