@@ -50,9 +50,9 @@ class Coach():
         while True:
             episodeStep += 1
 
-            if episodeStep % 20 == 0:
+            if episodeStep % 10 == 0:
                 end_time = time.time()
-                print(end_time-start_time)
+                print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
 
             canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
@@ -69,6 +69,7 @@ class Coach():
             scores = self.game.getGameEnded(self.board)
 
             if scores != [0, 0, 0]:
+                print("GAME OVER!")
                 return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
 
     def learn(self):
