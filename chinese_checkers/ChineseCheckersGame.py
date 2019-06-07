@@ -7,6 +7,7 @@ class ChineseCheckersGame(Game):
 
     def __init__(self):
         Game.__init__(self)
+        self.b = Board()
 
     def getInitBoard(self):
         """
@@ -15,8 +16,7 @@ class ChineseCheckersGame(Game):
             ard: a representation of the board (ideally this is the form
                         that will be the input to your neural network)
         """
-        b = Board()
-        return b.get_start()
+        return self.b.get_start()
 
     def getBoardSize(self):
         """
@@ -45,22 +45,20 @@ class ChineseCheckersGame(Game):
         """
         # if player takes action on board, return next (board,player)
         # action must be a valid move
-        b = Board()
         if action == self.getActionSize() - 1:
-            return board, b.get_next_player(player)
-        b = Board()
-        y_start, x_start, y_end, x_end = b.decode_move(action)
+            return board, self.b.get_next_player(player)
+        y_start, x_start, y_end, x_end = self.b.decode_move(action)
 
-        b.np_pieces = np.copy(board)
+        self.b.np_pieces = np.copy(board)
         if player != 1:
-            b.np_pieces = b.rotate_board(b.np_pieces, 1, player)
+            self.b.np_pieces = self.b.rotate_board(self.b.np_pieces, 1, player)
 
-        b.move((y_start, x_start), (y_end, x_end), player)
+        self.b.move((y_start, x_start), (y_end, x_end), player)
 
         if player != 1:
-            b.np_pieces = b.rotate_board(b.np_pieces, player, 1)
+            self.b.np_pieces = self.b.rotate_board(self.b.np_pieces, player, 1)
 
-        return b.np_pieces, b.get_next_player(player)
+        return self.b.np_pieces, self.b.get_next_player(player)
 
     def getValidMoves(self, board, player):
         """
@@ -74,23 +72,22 @@ class ChineseCheckersGame(Game):
                         0 for invalid moves
         """
         valids = [0]*self.getActionSize()
-        b = Board()
-        if b.get_done(board, player):
+        if self.b.get_done(board, player):
             valids[-1] = 1
             return valids
 
-        legal_moves_direct, legal_moves_jumping = b.get_legal_moves(board, player)
+        legal_moves_direct, legal_moves_jumping = self.b.get_legal_moves(board, player)
 
         for y_start, x_start, direction in legal_moves_direct:
-            valids[b.encode_move_direct(y_start, x_start, direction)] = 1
+            valids[self.b.encode_move_direct(y_start, x_start, direction)] = 1
 
         for y_start, x_start, y_end, x_end in legal_moves_jumping:
-            valids[b.encode_move_jumping(y_start, x_start, y_end, x_end)] = 1
+            valids[self.b.encode_move_jumping(y_start, x_start, y_end, x_end)] = 1
 
         return valids
 
 
-    def getGameEnded(self, board):
+    def getGameEnded(self, board, temporary):
         """
         Input:
             board: current board
@@ -101,11 +98,9 @@ class ChineseCheckersGame(Game):
                small non-zero value for draw.
 
         """
-        b = Board()
-        ended, scores = b.get_win_state(board)
-        if ended:
-            return scores
-        return [0, 0, 0]
+        ended, scores = self.b.get_win_state(board, temporary)
+
+        return scores
 
     def getCanonicalForm(self, board, player):
         """
@@ -132,7 +127,6 @@ class ChineseCheckersGame(Game):
         if player == 1:
             return board
 
-        b = Board()
         rotation_board = np.copy(board)
         players = [1, 2, 3]
         if player == 2:
@@ -144,7 +138,7 @@ class ChineseCheckersGame(Game):
         for p in range(len(players)):
             rotation_board[board == players[p]] = new_players[p]
 
-        return b.rotate_board(rotation_board, 1, player)
+        return self.b.rotate_board(rotation_board, 1, player)
 
 
 

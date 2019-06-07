@@ -68,16 +68,16 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
-        scores = self.game.getGameEnded(canonicalBoard)
+        scores = self.game.getGameEnded(canonicalBoard, True)
         if s not in self.Es:
             self.Es[s] = scores
-        if self.Es[s] != [0, 0, 0]:
+        if np.count_nonzero(self.Es[s]) == 1:
             # terminal node
-            return [scores[2], scores[0], scores[1]]
+            return np.array([scores[2], scores[0], scores[1]])
 
         if s not in self.Ps:
             # leaf node
-            self.Ps[s], scores = self.nnet.predict(canonicalBoard)
+            self.Ps[s], scores_nn = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
@@ -94,7 +94,12 @@ class MCTS():
 
             self.Vs[s] = valids
             self.Ns[s] = 0
-            return [scores[2], scores[0], scores[1]]
+
+            for i in range(3):
+                if scores[i] == 0:
+                    scores[i] = scores_nn[i]
+
+            return np.array([scores[2], scores[0], scores[1]])
 
         valids = self.Vs[s]
         cur_best = -float('inf')
@@ -127,4 +132,5 @@ class MCTS():
             self.Nsa[(s,a)] = 1
 
         self.Ns[s] += 1
-        return [scores[2], scores[0], scores[1]]
+
+        return np.array([scores[2], scores[0], scores[1]])

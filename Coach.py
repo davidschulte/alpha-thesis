@@ -66,9 +66,9 @@ class Coach():
             action = np.random.choice(len(pi), p=pi)
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
-            scores = self.game.getGameEnded(self.board)
+            scores = self.game.getGameEnded(self.board, False)
 
-            if scores != [0, 0, 0]:
+            if np.count_nonzero(scores) == 1:
                 print("GAME OVER!")
                 return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
 

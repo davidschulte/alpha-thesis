@@ -105,7 +105,8 @@ class Board():
             self.np_pieces = START
         else:
             self.np_pieces = np_pieces
-        self.scores = [0, 0, 0]
+        self.scores = np.array([0, 0, 0])
+        self.scores_temporary = np.array([0, 0, 0])
 
     def get_start(self):
         return START
@@ -185,22 +186,33 @@ class Board():
     def get_done(self, board, player):
         return False not in (board[END == player] == player)
 
-    def get_win_state(self, board):
+    def get_win_state(self, board, temporary):
+        if temporary:
+            scores = self.scores_temporary
+            for player in [1, 2, 3]:
+                if not self.get_done(board, player):
+                    scores[player - 1] = 0
+        else:
+            scores = self.scores
+
         still_playing = []
         for player in [1, 2, 3]:
-            if self.scores[player - 1] == 0:
+            if scores[player - 1] == 0:
                 still_playing.append(player)
 
         prize = PRIZES[-len(still_playing)]
         for player in still_playing:
             if self.get_done(board, player):
-                self.scores[player - 1] = prize
+                scores[player - 1] = prize
                 still_playing.remove(player)
 
+        if not temporary:
+            self.scores_temporary = np.copy(scores)
+
         if len(still_playing) < 2:
-            return True, self.scores
+            return True, scores
         else:
-            return False, self.scores
+            return False, scores
 
     # def boardReduce(self):
     def get_next_player(self, player):
