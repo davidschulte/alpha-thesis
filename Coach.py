@@ -7,6 +7,7 @@ import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
 import time
+from chinese_checkers.ChineseCheckersGame import Game
 
 
 class Coach():
@@ -45,6 +46,10 @@ class Coach():
         self.board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
+        state_history = [""] * 10
+        duplicate_tries = 0
+
+        g = Game()
 
         start_time = time.time()
         while True:
@@ -52,7 +57,7 @@ class Coach():
 
             if episodeStep % 10 == 0:
                 end_time = time.time()
-                print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
+                print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s Duplicates Tries: ", duplicate_tries)
                 start_time = end_time
 
             canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
@@ -63,14 +68,34 @@ class Coach():
             for b,p in sym:
                 trainExamples.append([b, self.curPlayer, p, None])
 
+            history_counter = (episodeStep - 1) % 10
+
             action = np.random.choice(len(pi), p=pi)
-            self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
+            next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
+
+            test = next_board.tostring()
+            # while next_board.tostring() in state_history:
+            #     duplicate_tries += 1
+            #     pi[action] = 0
+            #     pi = [x / float(sum(pi)) for x in pi]
+            #
+            #     action = np.random.choice(len(pi), p=pi)
+            #     next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
+
+            state_history[history_counter] = next_board.tostring()
+            self.board, self.curPlayer = next_board, next_curPlayer
 
             scores = self.game.getGameEnded(self.board, False)
 
-            if np.count_nonzero(scores) == 1:
-                print("GAME OVER!")
-                return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
+            if episodeStep % 5000 == 0:
+                print(self.board)
+
+            if np.count_nonzero(scores) < 3:
+                print("ONE PLAYER DONE!")
+                if np.count_nonzero(scores) == 1:
+                    print("GAME OVER!")
+                    print(self.board)
+                    return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
 
     def learn(self):
         """
@@ -80,6 +105,8 @@ class Coach():
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
         """
+
+
 
         for i in range(1, self.args.numIters+1):
             # bookkeeping
