@@ -7,8 +7,6 @@ import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
 import time
-from chinese_checkers.ChineseCheckersGame import Game
-
 
 class Coach():
     """
@@ -49,15 +47,13 @@ class Coach():
         state_history = [""] * 10
         duplicate_tries = 0
 
-        g = Game()
-
         start_time = time.time()
         while True:
             episodeStep += 1
 
             if episodeStep % 10 == 0:
                 end_time = time.time()
-                print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s Duplicates Tries: ", duplicate_tries)
+                print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
 
             canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
@@ -68,7 +64,7 @@ class Coach():
             for b,p in sym:
                 trainExamples.append([b, self.curPlayer, p, None])
 
-            history_counter = (episodeStep - 1) % 10
+            # history_counter = (episodeStep - 1) % 10
 
             action = np.random.choice(len(pi), p=pi)
             next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
@@ -82,12 +78,12 @@ class Coach():
             #     action = np.random.choice(len(pi), p=pi)
             #     next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
-            state_history[history_counter] = next_board.tostring()
+            # state_history[history_counter] = next_board.tostring()
             self.board, self.curPlayer = next_board, next_curPlayer
 
             scores = self.game.getGameEnded(self.board, False)
 
-            if episodeStep % 5000 == 0:
+            if episodeStep % 1000 == 0:
                 print(self.board)
 
             if np.count_nonzero(scores) > 0:
