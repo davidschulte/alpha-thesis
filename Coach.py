@@ -90,9 +90,9 @@ class Coach():
             if episodeStep % 5000 == 0:
                 print(self.board)
 
-            if np.count_nonzero(scores) < 3:
+            if np.count_nonzero(scores) > 0:
                 print("ONE PLAYER DONE!")
-                if np.count_nonzero(scores) == 1:
+                if np.count_nonzero(scores) == 2:
                     print("GAME OVER!")
                     print(self.board)
                     return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
