@@ -85,6 +85,7 @@ class Coach():
 
             if episodeStep % 1000 == 0:
                 print(self.board)
+                print(pi)
 
             if np.count_nonzero(scores) > 0:
                 print("ONE PLAYER DONE!")
