@@ -46,6 +46,7 @@ class Coach():
         episodeStep = 0
         state_history = [""] * 10
         duplicate_tries = 0
+        scores = [0, 0, 0]
 
         start_time = time.time()
         while True:
@@ -56,21 +57,22 @@ class Coach():
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
 
-            canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
-            # temp = int(episodeStep < self.args.tempThreshold)
-            temp = 1
+            if scores[self.curPlayer - 1] == 0:
+                canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
+                # temp = int(episodeStep < self.args.tempThreshold)
+                temp = 1
 
-            pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
-            choices = np.count_nonzero(pi)
-            if choices == 1:
-                print(choices)
-            sym = self.game.getSymmetries(canonicalBoard, pi)
-            for b,p in sym:
-                trainExamples.append([b, self.curPlayer, p, None])
+                pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
+                sym = self.game.getSymmetries(canonicalBoard, pi)
+                for b,p in sym:
+                    trainExamples.append([b, self.curPlayer, p, None])
 
-            # history_counter = (episodeStep - 1) % 10
+                # history_counter = (episodeStep - 1) % 10
 
-            action = np.random.choice(len(pi), p=pi)
+                action = np.random.choice(len(pi), p=pi)
+            else:
+                action = 2167
+
             next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
             test = next_board.tostring()
@@ -89,14 +91,11 @@ class Coach():
 
             if episodeStep % 1000 == 0:
                 print(self.board)
-                # print(pi)
 
-            if np.count_nonzero(scores) > 0:
-                print("ONE PLAYER DONE!")
-                if np.count_nonzero(scores) == 2:
-                    print("GAME OVER!")
-                    print(self.board)
-                    return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
+            if np.count_nonzero(scores) == 2:
+                print("GAME OVER!")
+                print(self.board)
+                return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
 
     def learn(self):
         """

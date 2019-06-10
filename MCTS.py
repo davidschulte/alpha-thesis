@@ -74,7 +74,7 @@ class MCTS():
         scores = self.game.getGameEnded(canonicalBoard, True)
         if s not in self.Es:
             self.Es[s] = scores
-        if np.count_nonzero(self.Es[s]) == 1:
+        if np.count_nonzero(self.Es[s]) == 2:
             # terminal node
             return np.array([scores[2], scores[0], scores[1]])
 
