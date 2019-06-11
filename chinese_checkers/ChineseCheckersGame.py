@@ -165,3 +165,6 @@ class ChineseCheckersGame(Game):
                          Required by MCTS for hashing.
         """
         return board.tostring()
+
+    def reset_board(self):
+        self.b = Board()

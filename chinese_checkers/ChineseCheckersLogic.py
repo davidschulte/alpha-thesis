@@ -334,6 +334,7 @@ class Board():
 
         return rotated_board
 
+
     # def encode_board(self, board):
     #     return board[board != OUT]
 

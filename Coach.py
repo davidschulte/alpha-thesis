@@ -47,6 +47,7 @@ class Coach():
         state_history = [""] * 10
         duplicate_tries = 0
         scores = [0, 0, 0]
+        self.game.reset_board()
 
         start_time = time.time()
         while True:
@@ -93,9 +94,12 @@ class Coach():
                 print(self.board)
 
             if np.count_nonzero(scores) == 2:
+                scores_player_two = np.array([scores[1], scores[2], scores[0]])
+                scores_player_three = np.array([scores[2], scores[0], scores[1]])
+                scores_all = [scores, scores_player_two, scores_player_three]
                 print("GAME OVER!")
                 print(self.board)
-                return [(x[0],x[2],scores[x[1]-1]) for x in trainExamples]
+                return [(x[0],x[2],scores_all[x[1]-1]) for x in trainExamples]
 
     def learn(self):
         """
