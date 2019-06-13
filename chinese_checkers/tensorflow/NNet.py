@@ -14,9 +14,9 @@ import tensorflow as tf
 from chinese_checkers.tensorflow.ChineseCheckersNNet import ChineseCheckersNNet as ccnet
 
 args = dotdict({
-    'lr': 0.001,
+    'lr': 0.0001,
     'dropout': 0.3,
-    'epochs': 10,
+    'epochs': 1,
     'batch_size': 64,
     'num_channels': 512,
 })

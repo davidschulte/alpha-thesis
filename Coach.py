@@ -1,5 +1,5 @@
 from collections import deque
-from ArenaBCKUP import Arena
+from Arena import Arena
 from MCTS import MCTS
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
@@ -53,7 +53,7 @@ class Coach():
         while True:
             episodeStep += 1
 
-            if episodeStep % 10 == 0:
+            if episodeStep % 100 == 0:
                 end_time = time.time()
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time

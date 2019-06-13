@@ -24,7 +24,7 @@ class Arena():
         self.game = game
         self.display = display
 
-    def playGame(self,lonely_player, turn_lonely, verbose=False):
+    def playGame(self, lonely_player, turn_lonely, verbose=False):
         """
         Executes one episode of a game.
 
@@ -44,8 +44,8 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
-        while self.game.getGameEnded(board, curPlayer) is None:
-            it+=1
+        while np.count_nonzero(self.game.getGameEnded(board, False)) < 2:
+            it += 1
             if verbose:
                 assert(self.display)
                 print("Turn ", str(it), "Player ", str(curPlayer))
@@ -62,7 +62,7 @@ class Arena():
             assert(self.display)
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
-        return self.game.getGameEnded(board, 1)
+        return self.game.getGameEnded(board, False)
 
     def playGames(self, num, verbose=False):
         """
@@ -80,7 +80,7 @@ class Arena():
         eps = 0
         maxeps = int(num)
 
-        num = int(num/len(6))
+        num = int(num/6)
         # oneWon = 0
         # twoWon = 0
         # draws = 0
@@ -88,11 +88,14 @@ class Arena():
         for lonely_player in [1,2]:
             for lonely_turn in range(3):
                 for _ in range(num):
+                    self.game.reset_board()
                     gameResult = self.playGame(lonely_player, lonely_turn, verbose=verbose)
-                    for p in [1, 2]:
-                        for s in len(gameResult):
-                            if bool(p == lonely_player) != bool(s != lonely_turn):
-                                scores[p-1] = gameResult[s]
+                    for t in range(3):
+                        # if bool(p == lonely_player) != bool(t != lonely_turn):
+                        if t == lonely_turn:
+                            scores[lonely_player-1] += gameResult[t]
+                        else:
+                            scores[-lonely_player+1] += gameResult[t]
 
                     # bookkeeping + plot progress
                     eps += 1
