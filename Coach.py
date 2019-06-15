@@ -44,8 +44,6 @@ class Coach():
         self.board = self.game.getInitBoard()
         self.curPlayer = 1
         episodeStep = 0
-        state_history = [""] * 10
-        duplicate_tries = 0
         scores = [0, 0, 0]
         self.game.reset_board()
 
@@ -68,24 +66,12 @@ class Coach():
                 for b,p in sym:
                     trainExamples.append([b, self.curPlayer, p, None])
 
-                # history_counter = (episodeStep - 1) % 10
-
                 action = np.random.choice(len(pi), p=pi)
             else:
                 action = 2167
 
             next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
-            test = next_board.tostring()
-            # while next_board.tostring() in state_history:
-            #     duplicate_tries += 1
-            #     pi[action] = 0
-            #     pi = [x / float(sum(pi)) for x in pi]
-            #
-            #     action = np.random.choice(len(pi), p=pi)
-            #     next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
-
-            # state_history[history_counter] = next_board.tostring()
             self.board, self.curPlayer = next_board, next_curPlayer
 
             scores = self.game.getGameEnded(self.board, False)
@@ -99,7 +85,7 @@ class Coach():
                 scores_all = [scores, scores_player_two, scores_player_three]
                 print("GAME OVER!")
                 print(self.board)
-                return [(x[0],x[2],scores_all[x[1]-1]) for x in trainExamples]
+                return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
 
     def learn(self):
         """

@@ -464,7 +464,7 @@ class Configuration:
                          onehot_encoder,
                          player_model_file):
                 from rts.keras.NNet import NNetWrapper as NNet
-                from MCTS import MCTS
+                from MCTSNEW import MCTS
 
                 if onehot_encoder:
                     encoder = OneHotEncoder()

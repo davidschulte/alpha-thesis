@@ -35,10 +35,10 @@ class Arena():
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
         if lonely_player == 1:
-            players = [self.player2, self.player2, self.player2];
+            players = [self.player2, self.player2, self.player2]
             players[turn_lonely] = self.player1
         else:
-            players = [self.player1, self.player1, self.player1];
+            players = [self.player1, self.player1, self.player1]
             players[turn_lonely] = self.player2
 
         curPlayer = 1

@@ -9,7 +9,7 @@ import unreal_engine as ue
 # noinspection PyUnresolvedReferences
 from TFPluginAPI import TFPluginAPI
 
-from MCTS import MCTS
+from MCTSNEW import MCTS
 from rts.RTSGame import RTSGame
 from rts.keras.NNet import NNetWrapper as NNet
 from rts.src.config import ACTS_REV, NUM_ACTS

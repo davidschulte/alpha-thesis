@@ -1,10 +1,7 @@
 #!/opt/python/python-3.6/i/bin/python
 
 from Coach import Coach
-# from othello.OthelloGame import OthelloGame as Game
 from chinese_checkers.ChineseCheckersGame import ChineseCheckersGame as Game
-#from othello.pytorch.NNet import NNetWrapper as nn
-# from othello.tensorflow.NNet import NNetWrapper as nn
 from chinese_checkers.tensorflow.NNet import NNetWrapper as nn
 from utils import *
 import numpy as np
