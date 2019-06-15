@@ -44,13 +44,26 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
-        while np.count_nonzero(self.game.getGameEnded(board, False)) < 2:
+
+        scores = np.array([0, 0, 0])
+        while np.count_nonzero(scores) < 2:
             it += 1
+
+            if it % 100 == 0:
+                print(it)
+
+                if it % 1000 == 0:
+                    print(board)
+
             if verbose:
                 assert(self.display)
                 print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board)
-            action = players[curPlayer-1](self.game.getCanonicalForm(board, curPlayer))
+
+            if scores[curPlayer-1] == 0:
+                action = players[curPlayer-1](self.game.getCanonicalForm(board, curPlayer))
+            else:
+                action = self.game.getActionSize()-1
 
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
 
@@ -58,10 +71,14 @@ class Arena():
                 print(action)
                 assert valids[action] >0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
+
+            scores = self.game.getGameEnded(board, False)
+
         if verbose:
             assert(self.display)
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
+
         return self.game.getGameEnded(board, False)
 
     def playGames(self, num, verbose=False):
