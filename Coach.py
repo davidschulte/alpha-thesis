@@ -166,8 +166,8 @@ class Coach():
             print('PITTING AGAINST PREVIOUS VERSION')
             # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
             #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
-            arena = Arena(lambda x: np.random.choice(len(self.game.getActionSize()), p=pmcts.getActionProb(x, temp=1)),
-                          lambda x: np.random.choice(len(self.game.getActionSize()), p=nmcts.getActionProb(x, temp=1)), self.game)
+            arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
+                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game)
 
             scores = arena.playGames(self.args.arenaCompare)
 
