@@ -34,7 +34,7 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s,a)] if (s,a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-        test = sum(counts)
+        # test = sum(counts)
 
         if temp==0:
             bestA = np.argmax(counts)
@@ -42,11 +42,15 @@ class MCTS():
             probs[bestA]=1
             return probs
 
-        counts = [x**(1./temp) for x in counts]
+        # counts = [x**(1./temp) for x in counts]
         test = sum(counts)
+        if test == 0:
+            print("ERROR")
+            print(canonicalBoard)
+            print(self.Nsa)
 
         probs = [x/float(sum(counts)) for x in counts]
-        test = sum(probs)
+        # test = sum(probs)
         return probs
 
 
