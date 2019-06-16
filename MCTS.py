@@ -84,6 +84,8 @@ class MCTS():
             return np.array([scores[2], scores[0], scores[1]])
 
         if s not in self.Ps or depth > DEPTHMAX:
+            if(depth > DEPTHMAX):
+                print("CUT LEAF")
             # leaf node
             self.Ps[s], scores_nn = self.nnet.predict(canonicalBoard)
             valids = self.game.getValidMoves(canonicalBoard, 1)
