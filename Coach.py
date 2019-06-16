@@ -164,8 +164,11 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             print('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
+            # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
+            #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
+            arena = Arena(lambda x: np.random.choice(len(pi), p=pmcts.getActionProb(x, temp=1)),
+                          lambda x: np.random.choice(len(pi), p=nmcts.getActionProb(x, temp=1)), self.game)
+
             scores = arena.playGames(self.args.arenaCompare)
 
             # print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
