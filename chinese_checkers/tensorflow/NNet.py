@@ -16,7 +16,7 @@ from chinese_checkers.tensorflow.ChineseCheckersNNet import ChineseCheckersNNet 
 args = dotdict({
     'lr': 0.0001,
     'dropout': 0.3,
-    'epochs': 1,
+    'epochs': 20,
     'batch_size': 64,
     'num_channels': 512,
 })
