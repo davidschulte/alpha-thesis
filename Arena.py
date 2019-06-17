@@ -46,6 +46,7 @@ class Arena():
         it = 0
 
         scores = np.array([0, 0, 0])
+        self.game.reset_board()
         while np.count_nonzero(scores) < 2:
             it += 1
 
@@ -79,7 +80,7 @@ class Arena():
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
 
-        return self.game.getGameEnded(board, False)
+        return scores
 
     def playGames(self, num, verbose=False):
         """

@@ -88,9 +88,7 @@ class Coach():
             else:
                 action = 2167
 
-            next_board, next_curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
-
-            self.board, self.curPlayer = next_board, next_curPlayer
+            self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
             scores = self.game.getGameEnded(self.board, False)
 
