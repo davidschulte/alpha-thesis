@@ -21,7 +21,7 @@ class ChineseCheckersNNet():
         # Neural Net
         self.graph = tf.Graph()
         with self.graph.as_default(): 
-            self.input_boards = tf.placeholder(tf.int8, shape=[None, self.board_y, self.board_x])    # s: batch_size x board_x x board_y
+            self.input_boards = tf.placeholder(tf.float32, shape=[None, self.board_y, self.board_x])    # s: batch_size x board_x x board_y
             self.dropout = tf.placeholder(tf.float32)
             self.isTraining = tf.placeholder(tf.bool, name="is_training")
 
@@ -36,7 +36,7 @@ class ChineseCheckersNNet():
             self.pi = Dense(s_fc2, self.action_size)                                                        # batch_size x self.action_size
             self.prob = tf.nn.softmax(self.pi)
             # self.v = Tanh(Dense(s_fc2, 1))                                                               # batch_size x 1
-            self.v = Dense(s_fc2,3)
+            self.v = Dense(s_fc2, 3)
 
             self.calculate_loss()
 
