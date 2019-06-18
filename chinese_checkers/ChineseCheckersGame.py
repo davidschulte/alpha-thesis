@@ -100,7 +100,7 @@ class ChineseCheckersGame(Game):
         """
         ended, scores = self.b.get_win_state(board, temporary)
 
-        return scores
+        return np.copy(scores)
 
     def getCanonicalForm(self, board, player):
         """

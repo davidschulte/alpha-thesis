@@ -76,7 +76,7 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
-        scores = self.game.getGameEnded(canonicalBoard, True)
+        scores = self.game.getGameEnded(canonicalBoard, True).astype('float16')
         if s not in self.Es:
             self.Es[s] = scores
         if np.count_nonzero(self.Es[s]) == 2:
