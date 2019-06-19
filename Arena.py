@@ -1,13 +1,14 @@
 import numpy as np
 import itertools
 from pytorch_classification.utils import Bar, AverageMeter
+from MCTS import MCTS
 import time
 
 class Arena():
     """
     An Arena class where any 2 agents can be pit against each other.
     """
-    def __init__(self, player1, player2, game, display=None):
+    def __init__(self, nnet1, nnet2, game, args, display=None):
         """
         Input:
             player 1,2: two functions that takes board as input, return action
@@ -19,9 +20,12 @@ class Arena():
         see othello/OthelloPlayers.py for an example. See pit.py for pitting
         human players/other baselines with each other.
         """
-        self.player1 = player1
-        self.player2 = player2
+        self.nnet1 = nnet1
+        self.nnet2 = nnet2
+        # self.player1 = player1
+        # self.player2 = player2
         self.game = game
+        self.args = args
         self.display = display
 
     def playGame(self, lonely_player, turn_lonely, verbose=False):
@@ -35,11 +39,11 @@ class Arena():
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
         if lonely_player == 1:
-            players = [self.player2, self.player2, self.player2]
-            players[turn_lonely] = self.player1
+            players = [MCTS(self.game, self.nnet2, self.args), MCTS(self.game, self.nnet2, self.args), MCTS(self.game, self.nnet2, self.args)]
+            players[turn_lonely] = MCTS(self.game, self.nnet1, self.args)
         else:
-            players = [self.player1, self.player1, self.player1]
-            players[turn_lonely] = self.player2
+            players = [MCTS(self.game, self.nnet1, self.args), MCTS(self.game, self.nnet1, self.args), MCTS(self.game, self.nnet1, self.args)]
+            players[turn_lonely] = MCTS(self.game, self.nnet2, self.args)
 
         curPlayer = 1
         board = self.game.getInitBoard()
@@ -62,7 +66,7 @@ class Arena():
                 self.display(board)
 
             if scores[curPlayer-1] == 0:
-                action = players[curPlayer-1](self.game.getCanonicalForm(board, curPlayer))
+                action = np.random.choice(self.game.getActionSize(), p=players[curPlayer-1].getActionProb(x, temp=1))
             else:
                 action = self.game.getActionSize()-1
 

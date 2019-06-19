@@ -165,7 +165,9 @@ class Coach():
             # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
             #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
             arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
-                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game)
+                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game, self.args)
+
+            arena = Arena(self.pnet, self.nnet, self.game)
 
             scores = arena.playGames(self.args.arenaCompare)
 
