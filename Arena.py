@@ -3,6 +3,23 @@ import itertools
 from pytorch_classification.utils import Bar, AverageMeter
 from MCTS import MCTS
 import time
+import cProfile, pstats, io
+def profile(fnc):
+    """A decorator that uses cProfile to profile a function"""
+
+    def inner(*args, **kwargs):
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable()
+        s = io.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return inner
 
 class Arena():
     """
@@ -28,6 +45,7 @@ class Arena():
         self.args = args
         self.display = display
 
+    @profile
     def playGame(self, lonely_player, turn_lonely, verbose=False):
         """
         Executes one episode of a game.
