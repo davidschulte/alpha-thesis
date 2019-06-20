@@ -112,7 +112,12 @@ class Arena():
             for lonely_turn in range(3):
                 for _ in range(num):
                     self.game.reset_board()
+                    print("New Game")
+                    print("Lonely Player: " + str(lonely_player))
+                    print("Lonely Turn: " + str(lonely_turn+1))
                     gameResult = self.playGame(lonely_player, lonely_turn, verbose=verbose)
+                    print("RESULTS")
+                    print(gameResult)
                     for t in range(3):
                         # if bool(p == lonely_player) != bool(t != lonely_turn):
                         if t == lonely_turn:
@@ -120,6 +125,8 @@ class Arena():
                         else:
                             scores[-lonely_player+1] += gameResult[t]
 
+                    print("CUMMULATED RESULTS:")
+                    print(scores)
                     # bookkeeping + plot progress
                     eps += 1
                     eps_time.update(time.time() - end)
