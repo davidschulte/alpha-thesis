@@ -141,7 +141,7 @@ class Arena():
                         if t == lonely_turn:
                             scores[lonely_player-1] += gameResult[t]
                         else:
-                            scores[-lonely_player+1] += gameResult[t]
+                            scores[2-lonely_player] += gameResult[t]
 
                     print("CUMMULATED RESULTS:")
                     print(scores)

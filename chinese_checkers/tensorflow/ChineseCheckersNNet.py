@@ -36,8 +36,8 @@ class ChineseCheckersNNet():
             self.pi = Dense(s_fc2, self.action_size)                                                        # batch_size x self.action_size
             self.prob = tf.nn.softmax(self.pi)
             # self.v = Tanh(Dense(s_fc2, 1))                                                               # batch_size x 1
-            self.v = Dense(s_fc2, 3)
-
+            self.v = tf.nn.softmax(Dense(s_fc2, 3))*4.0
+            # self.v = Dense(s_fc2, 3)
             self.calculate_loss()
 
     def conv2d(self, x, out_channels, padding):
