@@ -18,7 +18,7 @@ args = dotdict({
     'maxlenOfQueue': 200000,
     'numMCTSSims': 10,
     'arenaCompare': 6,
-    'cpuct': 20,
+    'cpuct': 30,
 
     'checkpoint': './temp/',
     'load_model': False,
