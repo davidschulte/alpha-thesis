@@ -1,7 +1,7 @@
 import math
 import numpy as np
 EPS = 1e-8
-DEPTHMAX = 25
+DEPTHMAX = 30
 
 class MCTS():
     """
