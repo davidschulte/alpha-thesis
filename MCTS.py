@@ -81,6 +81,7 @@ class MCTS():
 
         if s in self.C and scores[0] == 0:
             if self.C[s] >= 3:
+                scores[scores == 0] = 1
                 scores[2] = 0
                 return np.array([scores[2], scores[0], scores[1]])
 
