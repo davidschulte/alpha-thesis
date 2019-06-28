@@ -11,7 +11,7 @@ from pytorch_classification.utils import Bar, AverageMeter
 from NeuralNet import NeuralNet
 
 import tensorflow as tf
-from chinese_checkers.tensorflow.ChineseCheckersNNet import ChineseCheckersNNet as ccnet
+from chinese_checkers.tensorflow.ChineseCheckersNNetNEW import ChineseCheckersNNet as ccnet
 
 args = dotdict({
     'lr': 0.0001,

@@ -9,7 +9,7 @@ from rts.keras.RTSNNet import RTSNNet
 from rts.src.config import VERBOSE_MODEL_FIT
 
 """
-NNet.py
+NNetNEW.py
 
 NNet wrapper uses defined nnet model to train and predict
 
