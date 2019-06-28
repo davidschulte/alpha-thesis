@@ -83,6 +83,8 @@ class MCTS():
             if self.C[s] >= 3:
                 scores[scores == 0] = 1
                 scores[2] = 0
+                print("LOOP")
+                print(canonicalBoard)
                 return np.array([scores[2], scores[0], scores[1]])
 
         if s not in self.Es:
