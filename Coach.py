@@ -90,6 +90,14 @@ class Coach():
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
 
+            s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
+
+            if action != 2167:
+                if s not in self.mcts.C:
+                    self.mcts.C[s] = 1
+                else:
+                    self.mcts.C[s] += 1
+
             scores = self.game.getGameEnded(self.board, False)
 
             if episodeStep % 1000 == 0:

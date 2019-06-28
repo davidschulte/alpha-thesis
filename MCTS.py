@@ -16,6 +16,7 @@ class MCTS():
         self.Nsa = {}       # stores #times edge s,a was visited
         self.Ns = {}        # stores #times board s was visited
         self.Ps = {}        # stores initial policy (returned by neural net)
+        self.C = {}
 
         self.Es = {}        # stores game.getGameEnded ended for board s
         self.Vs = {}        # stores game.getValidMoves for board s
@@ -77,6 +78,12 @@ class MCTS():
         s = self.game.stringRepresentation(canonicalBoard)
 
         scores = self.game.getGameEnded(canonicalBoard, True).astype('float16')
+
+        if s in self.C and scores[0] == 0:
+            if self.C[s] >= 3:
+                scores[2] = 0
+                return np.array([scores[2], scores[0], scores[1]])
+
         if s not in self.Es:
             self.Es[s] = scores
         if np.count_nonzero(self.Es[s]) == 2:

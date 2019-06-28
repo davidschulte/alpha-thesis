@@ -21,9 +21,9 @@ class ChineseCheckersNNet():
         # Neural Net
         self.graph = tf.Graph()
         with self.graph.as_default(): 
-            self.input_boards = tf.compat.v1.placeholder(tf.float32, shape=[None, self.board_y, self.board_x])    # s: batch_size x board_x x board_y
-            self.dropout = tf.compat.v1.placeholder(tf.float32)
-            self.isTraining = tf.compat.v1.placeholder(tf.bool, name="is_training")
+            self.input_boards = tf.placeholder(tf.float32, shape=[None, self.board_y, self.board_x])    # s: batch_size x board_x x board_y
+            self.dropout = tf.placeholder(tf.float32)
+            self.isTraining = tf.placeholder(tf.bool, name="is_training")
 
             x_image = tf.reshape(self.input_boards, [-1, self.board_x, self.board_y, 1])                    # batch_size  x board_x x board_y x 1
             h_conv1 = Relu(BatchNormalization(self.conv2d(x_image, args.num_channels, 'same'), axis=3, training=self.isTraining))     # batch_size  x board_x x board_y x num_channels
@@ -44,8 +44,8 @@ class ChineseCheckersNNet():
       return tf.layers.conv2d(x, out_channels, kernel_size=[3,3], padding=padding, use_bias=False)
 
     def calculate_loss(self):
-        self.target_pis = tf.compat.v1.placeholder(tf.float32, shape=[None, self.action_size])
-        self.target_vs = tf.compat.v1.placeholder(tf.float32, shape=[None, 3])
+        self.target_pis = tf.placeholder(tf.float32, shape=[None, self.action_size])
+        self.target_vs = tf.placeholder(tf.float32, shape=[None, 3])
         self.loss_pi =  tf.losses.softmax_cross_entropy(self.target_pis, self.pi)
         self.loss_v = tf.losses.softmax_cross_entropy(self.target_vs, tf.reshape(self.v, shape=[-1,3]))
         self.total_loss = self.loss_pi + self.loss_v
