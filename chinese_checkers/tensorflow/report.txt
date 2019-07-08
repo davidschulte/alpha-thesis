@@ -1,0 +1,66 @@
+--------------------------------------------------------------------------------
+Processing file 'NNet.py'
+ outputting to 'NNetUpgraded.py'
+--------------------------------------------------------------------------------
+
+'NNet.py' Line 30
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.Session' to 'tf.compat.v1.Session'
+
+    Old:         self.sess = tf.Session(graph=self.nnet.graph)
+                             ~~~~~~~~~~                        
+    New:         self.sess = tf.compat.v1.Session(graph=self.nnet.graph)
+                             ~~~~~~~~~~~~~~~~~~~~                        
+
+'NNet.py' Line 32
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.Session' to 'tf.compat.v1.Session'
+
+    Old:         with tf.Session() as temp_sess:
+                      ~~~~~~~~~~                 
+    New:         with tf.compat.v1.Session() as temp_sess:
+                      ~~~~~~~~~~~~~~~~~~~~                 
+
+'NNet.py' Line 33
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+
+    Old:             temp_sess.run(tf.global_variables_initializer())
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+    New:             temp_sess.run(tf.compat.v1.global_variables_initializer())
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
+
+'NNet.py' Line 34
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.variables_initializer' to 'tf.compat.v1.variables_initializer'
+
+    Old:         self.sess.run(tf.variables_initializer(self.nnet.graph.get_collection('variables')))
+                               ~~~~~~~~~~~~~~~~~~~~~~~~                                               
+    New:         self.sess.run(tf.compat.v1.variables_initializer(self.nnet.graph.get_collection('variables')))
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                               
+
+'NNet.py' Line 113
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.train.Saver' to 'tf.compat.v1.train.Saver'
+
+    Old:             self.saver = tf.train.Saver(self.nnet.graph.get_collection('variables'))
+                                  ~~~~~~~~~~~~~~                                              
+    New:             self.saver = tf.compat.v1.train.Saver(self.nnet.graph.get_collection('variables'))
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~                                              
+
+'NNet.py' Line 122
+--------------------------------------------------------------------------------
+
+Renamed function 'tf.train.Saver' to 'tf.compat.v1.train.Saver'
+
+    Old:             self.saver = tf.train.Saver()
+                                  ~~~~~~~~~~~~~~   
+    New:             self.saver = tf.compat.v1.train.Saver()
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~   
+
+
