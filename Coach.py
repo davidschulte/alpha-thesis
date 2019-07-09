@@ -73,6 +73,8 @@ class Coach():
                 end_time = time.time()
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
+                if episodeStep % 1000 == 0:
+                    print(self.board)
 
             if scores[self.curPlayer - 1] == 0:
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
@@ -86,22 +88,18 @@ class Coach():
 
                 action = np.random.choice(len(pi), p=pi)
             else:
-                action = 2167
+                action = self.game.getActionSize() - 1
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
-
             s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
 
-            if action != 2167:
+            if action != self.game.getActionSize() - 1:
                 if s not in self.mcts.C:
                     self.mcts.C[s] = 1
                 else:
                     self.mcts.C[s] += 1
 
             scores = self.game.getGameEnded(self.board, False)
-
-            if episodeStep % 1000 == 0:
-                print(self.board)
 
             if np.count_nonzero(scores) == 2:
                 scores_player_two = np.array([scores[1], scores[2], scores[0]])

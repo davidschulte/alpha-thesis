@@ -45,20 +45,21 @@ class ChineseCheckersGame(Game):
         """
         # if player takes action on board, return next (board,player)
         # action must be a valid move
+        next_board = np.copy(board)
+
         if action == self.getActionSize() - 1:
             return board, self.b.get_next_player(player)
         y_start, x_start, y_end, x_end = self.b.decode_move(action)
 
-        self.b.np_pieces = np.copy(board)
         if player != 1:
-            self.b.np_pieces = self.b.rotate_board(self.b.np_pieces, 1, player)
+            next_board = self.b.rotate_board(next_board, 1, player)
 
-        self.b.move((y_start, x_start), (y_end, x_end), player)
+        next_board = self.b.move(y_start, x_start, y_end, x_end, next_board, player)
 
         if player != 1:
-            self.b.np_pieces = self.b.rotate_board(self.b.np_pieces, player, 1)
+            next_board = self.b.rotate_board(next_board, player, 1)
 
-        return self.b.np_pieces, self.b.get_next_player(player)
+        return next_board, self.b.get_next_player(player)
 
     def getValidMoves(self, board, player):
         """

@@ -121,12 +121,12 @@ class Arena():
         eps = 0
         maxeps = int(num)
 
-        num = int(num/6)
+        num = int(num / 6)
         # oneWon = 0
         # twoWon = 0
         # draws = 0
         scores = [0, 0]
-        for lonely_player in [1,2]:
+        for lonely_player in [1, 2]:
             for lonely_turn in range(3):
                 for _ in range(num):
                     self.game.reset_board()

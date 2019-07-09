@@ -100,11 +100,7 @@ ROTATION_LEFT = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 204, 0, 0, 0, 0,
 
 class Board():
 
-    def __init__(self, np_pieces=None):
-        if np_pieces is None:
-            self.np_pieces = START
-        else:
-            self.np_pieces = np_pieces
+    def __init__(self):
         self.scores = np.array([0, 0, 0])
         self.scores_temporary = np.array([0, 0, 0])
 
@@ -163,25 +159,12 @@ class Board():
         if END[y_start, x_start] == 1 and END[y_end, x_end] != 1:
             return False
         return True
-    # def get_reachables(self, y, x, board, reachables_jump=[], jumping=False):
-    #     neighbors = self.get_neighbors(y, x, board)
-    #     if jumping:
-    #         for (yN, xN, valN, dir) in neighbors:
-    #             if valN not in [EMPTY, OUT]:
-    #                 (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
-    #                 if (yNN, xNN) not in reachables_jump and valNN == EMPTY:
-    #                     reachables.append((yNN, xNN))
-    #                     reachables = list(set().union(reachables, self.get_reachables(yNN, xNN, board, reachables, True)))
-    #     else:
-    #         for (yN, xN, valN, _) in neighbors:
-    #             if valN == EMPTY:
-    #                 reachables_direct.append((yN, xN))
-    #         reachables = list(set().union(reachables, self.get_reachables(y, x, self.np_pieces, reachables, True)))
-    #     return reachables
 
-    def move(self, start_coordinates, end_coordinates, player):
-        self.np_pieces[start_coordinates[0], start_coordinates[1]] = EMPTY
-        self.np_pieces[end_coordinates[0], end_coordinates[1]] = player
+
+    def move(self, y_start, x_start, y_end, x_end, board, player):
+        board[y_start, x_start] = EMPTY
+        board[y_end, x_end] = player
+        return board
 
     def get_done(self, board, player):
         return False not in (board[END == player] == player)
@@ -219,14 +202,6 @@ class Board():
         return player % 3 + 1
 
     def get_legal_moves(self, board, player):
-        # legal_moves = []
-        # player_y_list, player_x_list = np.where(board == player)
-        # for i in range(len(player_y_list)):
-        #     y_start, x_start = (player_y_list[i], player_x_list[i])
-        #     reachables = self.get_reachables(y_start, x_start, board)
-        #     for y_end, x_end in reachables:
-        #         legal_moves.append((y_start, x_start, y_end, x_end))
-        # return legal_moves
         legal_moves_direct = []
         legal_moves_jumping = []
 
@@ -252,18 +227,10 @@ class Board():
         grid_no, start = self.encode_coordinates_grid(y_start, x_start)
         grid_nu, end = self.encode_coordinates_grid(y_end, x_end)
 
-        encoded = sum(ACTION_SIZE_OFFSET[0:grid_no]) - 1 + start * ACTION_SUB_SPACE[grid_no] + end
-        # if encoded >= 81 * 6 + 25 * 25 + 2 * 20 * 20 + 16 * 16 + 1 or grid_no != grid_nu or encoded == 1485:
-        #     print("DEBUG")
+        # encoded = sum(ACTION_SIZE_OFFSET[0:grid_no]) - 1 + start * ACTION_SUB_SPACE[grid_no] + end
         return sum(ACTION_SIZE_OFFSET[0:grid_no]) + start * ACTION_SUB_SPACE[grid_no] + end
 
-    # def decode_coordinates(self, coded):
-    #     (x_coordinates, y_coordinates) = np.where(START != OUT)
-    #     return y_coordinates[coded], x_coordinates[coded]
     def decode_move(self, move):
-        # if move == 1485:
-        #     print("DEBUG")
-
         grid = 0
 
         while move > ACTION_SIZE_OFFSET[grid]:
@@ -333,18 +300,3 @@ class Board():
                 rotated_board[ROTATION_LEFT[i]] = rotation_board[i]
 
         return rotated_board
-
-
-    # def encode_board(self, board):
-    #     return board[board != OUT]
-
-    # def get_end_by_player(self, player):
-    #     end_board = np.copy(END)
-    #
-    #     shift = player - 1;
-    #     for p in [1,2,3]:
-    #         end_board[END == p] = (p + shift) % 3
-    #
-    #     return end_board
-
-
