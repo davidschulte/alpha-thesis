@@ -19,9 +19,9 @@ class NNetWrapper:
         self.action_size = game.getActionSize()
 
         self.dropout = 0.3
-        self.epochs = 6
-        self.batch_size = 64
-        self.num_channels = 512
+        self.epochs = 1
+        self.batch_size = 32
+        self.num_channels = 128
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
 
