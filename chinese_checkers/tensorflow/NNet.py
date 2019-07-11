@@ -6,9 +6,9 @@ from utils import dotdict
 args = dotdict({
     'lr': 0.0001,
     'dropout': 0.3,
-    'epochs': 6,
+    'epochs': 1,
     'batch_size': 32,
-    'num_channels': 256,
+    'num_channels': 128,
 })
 
 
@@ -45,7 +45,7 @@ class NNetWrapper:
 
         x = keras.layers.Reshape(((self.board_y-4)*(self.board_x-4)*self.num_channels,))(x)
 
-        x = keras.layers.Dense(1024)(x)
+        x = keras.layers.Dense(512)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Dropout(drop_out_rate)(x)
