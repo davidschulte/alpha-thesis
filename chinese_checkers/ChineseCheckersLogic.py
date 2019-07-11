@@ -105,7 +105,7 @@ class Board():
         self.scores_temporary = np.array([0, 0, 0])
 
     def get_start(self):
-        return START
+        return np.copy(START)
 
     # 1=left, 2=right, 3=lu, 4=ru, 5=ld, 6=rd
     def get_neighbor(self, y, x, dir, board):
@@ -134,7 +134,7 @@ class Board():
         return neighbors
 
     def get_reachables_direct(self, y, x, board):
-        reachables = [];
+        reachables = []
         neighbors = self.get_neighbors(y, x, board)
         for (yN, xN, valN, dirN) in neighbors:
             if valN == EMPTY and self.right_zone(y, x, yN, xN):
@@ -154,8 +154,8 @@ class Board():
         return reachables
 
     def right_zone(self, y_start, x_start, y_end, x_end):
-        if START[y_start, x_start] != 1 and START[y_end, x_end] == 1:
-            return False
+        # if START[y_start, x_start] != 1 and START[y_end, x_end] == 1:
+        #     return False
         if END[y_start, x_start] == 1 and END[y_end, x_end] != 1:
             return False
         return True
@@ -166,14 +166,17 @@ class Board():
         board[y_end, x_end] = player
         return board
 
-    def get_done(self, board, player):
-        return False not in (board[END == player] == player)
+    def get_done(self, board, player, color_matters):
+        if color_matters:
+            return False not in (board[END == player] == player)
+        else:
+            return False not in (board[END == player] != EMPTY)
 
     def get_win_state(self, board, temporary):
         if temporary:
             scores = self.scores_temporary
             for player in [1, 2, 3]:
-                if not self.get_done(board, player):
+                if not self.get_done(board, player, False):
                     scores[player - 1] = 0
         else:
             scores = self.scores
@@ -184,20 +187,20 @@ class Board():
                 still_playing.append(player)
 
         prize = PRIZES[-len(still_playing)]
+        if len(still_playing) < 3:
+            color_matters = False
+        else:
+            color_matters = True
         for player in still_playing:
-            if self.get_done(board, player):
+            if self.get_done(board, player, color_matters):
                 scores[player - 1] = prize
                 still_playing.remove(player)
 
         if not temporary:
             self.scores_temporary = np.copy(scores)
 
-        if len(still_playing) < 2:
-            return True, scores
-        else:
-            return False, scores
+        return scores
 
-    # def boardReduce(self):
     def get_next_player(self, player):
         return player % 3 + 1
 
@@ -250,12 +253,10 @@ class Board():
 
     def decode_coordinates(self, encoded):
         y_coordinates, x_coordinates = np.where(GRID != 0)
-
         return y_coordinates[encoded], x_coordinates[encoded]
 
     def decode_coordinates_grid(self, encoded, grid_no):
         y_coordinates, x_coordinates = np.where(GRID == grid_no)
-
         return y_coordinates[encoded], x_coordinates[encoded]
 
     def encode_coordinates(self, y, x):
@@ -263,8 +264,6 @@ class Board():
         y_fits = np.where(y_coordinates == y)
         x_fits = np.where(x_coordinates == x)
         index_list = np.intersect1d(y_fits, x_fits)
-        if len(index_list) < 1:
-            print("DEBUG")
         return index_list[0]
 
     def encode_coordinates_grid(self, y, x):

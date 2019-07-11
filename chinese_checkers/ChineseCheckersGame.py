@@ -73,7 +73,7 @@ class ChineseCheckersGame(Game):
                         0 for invalid moves
         """
         valids = [0]*self.getActionSize()
-        if self.b.get_done(board, player):
+        if self.b.get_done(board, player, True):
             valids[-1] = 1
             return valids
 
@@ -99,7 +99,7 @@ class ChineseCheckersGame(Game):
                small non-zero value for draw.
 
         """
-        ended, scores = self.b.get_win_state(board, temporary)
+        scores = self.b.get_win_state(board, temporary)
 
         return np.copy(scores)
 

@@ -7,8 +7,8 @@ args = dotdict({
     'lr': 0.0001,
     'dropout': 0.3,
     'epochs': 6,
-    'batch_size': 64,
-    'num_channels': 512,
+    'batch_size': 32,
+    'num_channels': 256,
 })
 
 
@@ -55,11 +55,12 @@ class NNetWrapper:
         x = keras.layers.ReLU()(x)
         x = keras.layers.Dropout(args.dropout)(x)
 
-        pi = keras.layers.Dense(action_size, activation='softmax')(x)
-        # pi = tf.keras.layers.Softmax()(pi)
+        pi = keras.layers.Dense(action_size)(x)
+        pi = keras.layers.Softmax()(pi)
 
         v = keras.layers.Dense(3)(x)
         v = keras.layers.Softmax()(v)
+        v = keras.layers.Lambda(lambda x: x * 3)(v)
 
         # x = tf.keras.layers.Dense(num_channels, activation='relu')(x)
         # x = tf.keras.layers.Dense(num_channels, activation='relu')(x)

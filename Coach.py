@@ -93,11 +93,11 @@ class Coach():
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
             s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
 
-            if action != self.game.getActionSize() - 1:
-                if s not in self.mcts.C:
-                    self.mcts.C[s] = 1
-                else:
-                    self.mcts.C[s] += 1
+            # if action != self.game.getActionSize() - 1:
+            #     if s not in self.mcts.C:
+            #         self.mcts.C[s] = 1
+            #     else:
+            #         self.mcts.C[s] += 1
 
             scores = self.game.getGameEnded(self.board, False)
 
@@ -117,8 +117,6 @@ class Coach():
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
         """
-
-
 
         for i in range(1, self.args.numIters+1):
             # bookkeeping
