@@ -6,7 +6,7 @@ from utils import dotdict
 args = dotdict({
     'lr': 0.0001,
     'dropout': 0.3,
-    'epochs': 1,
+    'epochs': 5,
     'batch_size': 32,
     'num_channels': 128,
 })
@@ -20,7 +20,7 @@ class NNetWrapper:
 
         self.dropout = 0.3
         self.epochs = 1
-        self.batch_size = 32
+        self.batch_size = 64
         self.num_channels = 128
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
@@ -36,14 +36,14 @@ class NNetWrapper:
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3, padding='same')(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
-        x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=5)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
 
-        x = keras.layers.Reshape(((self.board_y-4)*(self.board_x-4)*self.num_channels,))(x)
+        x = keras.layers.Reshape(((self.board_y-6)*(self.board_x-6)*self.num_channels,))(x)
 
         x = keras.layers.Dense(512)(x)
         x = keras.layers.BatchNormalization()(x)
