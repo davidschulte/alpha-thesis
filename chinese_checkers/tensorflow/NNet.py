@@ -36,14 +36,14 @@ class NNetWrapper:
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3, padding='same')(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
-        x = keras.layers.Conv2D(self.num_channels, kernel_size=5)(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
 
-        x = keras.layers.Reshape(((self.board_y-6)*(self.board_x-6)*self.num_channels,))(x)
+        x = keras.layers.Reshape(((self.board_y-4)*(self.board_x-4)*self.num_channels,))(x)
 
         x = keras.layers.Dense(512)(x)
         x = keras.layers.BatchNormalization()(x)
