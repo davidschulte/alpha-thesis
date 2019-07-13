@@ -78,6 +78,8 @@ class MCTS():
         s = self.game.stringRepresentation(canonicalBoard)
 
         scores = self.game.getGameEnded(canonicalBoard, True).astype('float16')
+        if sum(scores) > 0:
+            print("DEBUG!")
 
         # if s in self.C and scores[0] == 0:
         #     if self.C[s] >= 3:
@@ -88,7 +90,7 @@ class MCTS():
         #         return np.array([scores[2], scores[0], scores[1]])
 
         if s not in self.Es:
-            self.Es[s] = scores
+            self.Es[s] = np.copy(scores)
         if np.count_nonzero(self.Es[s]) == 2:
             # terminal node
             return np.array([scores[2], scores[0], scores[1]])
@@ -98,6 +100,8 @@ class MCTS():
                 print("CUT LEAF")
             # leaf node
             self.Ps[s], scores_nn = self.nnet.predict(canonicalBoard)
+            if scores_nn[0] > 0 and scores_nn[1] > 0 and scores_nn[2] > 0:
+                print("DEBUG")
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])

@@ -6,7 +6,7 @@ from utils import dotdict
 args = dotdict({
     'lr': 0.0001,
     'dropout': 0.3,
-    'epochs': 5,
+    'epochs': 1,
     'batch_size': 32,
     'num_channels': 128,
 })
@@ -19,7 +19,7 @@ class NNetWrapper:
         self.action_size = game.getActionSize()
 
         self.dropout = 0.3
-        self.epochs = 1
+        self.epochs = 5
         self.batch_size = 64
         self.num_channels = 128
 
@@ -59,8 +59,9 @@ class NNetWrapper:
         pi = keras.layers.Softmax()(pi)
 
         v = keras.layers.Dense(3)(x)
-        v = keras.layers.Softmax()(v)
-        v = keras.layers.Lambda(lambda x: x * 3)(v)
+        v = keras.layers.ReLU()(v)
+        # v = keras.layers.Softmax()(v)
+        # v = keras.layers.Lambda(lambda x: x * 3)(v)
 
         # x = tf.keras.layers.Dense(num_channels, activation='relu')(x)
         # x = tf.keras.layers.Dense(num_channels, activation='relu')(x)
