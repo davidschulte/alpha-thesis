@@ -20,9 +20,9 @@ args = dotdict({
     'arenaCompare': 6,
     'cpuct': 40,
 
-    'checkpoint': './temp/',
+    'checkpoint': '/mnt/disks/largedisk/checkpoint',
     'load_model': False,
-    'load_folder_file': ('/dev/models/8x100x50','best.pth.tar'),
+    'load_folder_file': ('/mnt/disks/largedisk/checkpoints','best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
 
 })

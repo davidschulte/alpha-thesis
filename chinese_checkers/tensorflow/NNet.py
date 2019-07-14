@@ -86,7 +86,7 @@ class NNetWrapper:
         v = np.reshape(v, (3,))
         return pi, v
 
-    def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+    def save_checkpoint(self, folder='/mnt/disks/largedisk/checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
         if not os.path.exists(folder):
             print("Checkpoint Directory does not exist! Making directory {}".format(folder))
@@ -96,7 +96,7 @@ class NNetWrapper:
 
         self.model.save(filepath)
 
-    def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+    def load_checkpoint(self, folder='/mnt/disks/largedisk/checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
         # if not os.path.exists(filepath+'.meta'):
         #     raise("No model in path {}".format(filepath))
