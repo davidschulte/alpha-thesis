@@ -56,10 +56,10 @@ class NNetWrapper:
         x = keras.layers.Dropout(args.dropout)(x)
 
         pi = keras.layers.Dense(action_size)(x)
-        pi = keras.layers.Softmax()(pi)
+        pi = keras.layers.Softmax(name='pi')(pi)
 
         v = keras.layers.Dense(3)(x)
-        v = keras.layers.ReLU()(v)
+        v = keras.layers.ReLU(name='v')(v)
         # v = keras.layers.Softmax()(v)
         # v = keras.layers.Lambda(lambda x: x * 3)(v)
 
@@ -71,7 +71,8 @@ class NNetWrapper:
         self.model = keras.Model(inputs=inputs, outputs=[pi, v])
 
         self.model.compile(optimizer='adam',
-                      loss='mean_absolute_error',
+                      loss={'pi': 'categorical_crossentropy',
+                          'v': 'mean_squared_error'},
                       metrics=['accuracy'])
 
     def train(self, examples):
@@ -86,7 +87,7 @@ class NNetWrapper:
         v = np.reshape(v, (3,))
         return pi, v
 
-    def save_checkpoint(self, folder='/mnt/disks/largedisk/checkpoint', filename='checkpoint.pth.tar'):
+    def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
         if not os.path.exists(folder):
             print("Checkpoint Directory does not exist! Making directory {}".format(folder))
@@ -96,7 +97,7 @@ class NNetWrapper:
 
         self.model.save(filepath)
 
-    def load_checkpoint(self, folder='/mnt/disks/largedisk/checkpoint', filename='checkpoint.pth.tar'):
+    def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
         # if not os.path.exists(filepath+'.meta'):
         #     raise("No model in path {}".format(filepath))
