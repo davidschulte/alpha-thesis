@@ -1,7 +1,7 @@
 #!/opt/python/python-3.6/i/bin/python
 
 from Coach import Coach
-from chinese_checkers.ChineseCheckersGame import ChineseCheckersGame as Game
+from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
 from chinese_checkers.tensorflow.NNet import NNetWrapper as nn
 from utils import *
 import numpy as np
@@ -18,7 +18,7 @@ args = dotdict({
     'maxlenOfQueue': 100000,
     'numMCTSSims': 100,
     'arenaCompare': 6,
-    'cpuct': 40,
+    'cpuct': 10,
 
     'checkpoint': 'checkpoint',
     'load_model': False,

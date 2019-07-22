@@ -133,11 +133,17 @@ class MCTS():
                     pssa = self.Ps[s][a]
                     ns = self.Ns[s]
                     nsa = self.Nsa[(s,a)]
+                    exploitation = self.Qsa[(s,a)]
+                    exploration = self.Ps[s][a]*math.sqrt(self.Ns[s])/(1+self.Nsa[(s,a)])
                     u = self.Qsa[(s,a)] + self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s])/(1+self.Nsa[(s,a)])
+                    u = u
                 else:
                     pssa = self.Ps[s][a]
                     nsa = self.Ns[s]
+                    exploitation = 0
+                    exploration = self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)
                     u = self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)     # Q = 0 ?
+                    u = u
 
                 if u > cur_best:
                     cur_best = u
