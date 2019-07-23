@@ -98,6 +98,7 @@ class MCTS():
             self.Loop = {s: 1}
         else:
             if s in self.Loop:
+                print("Pevented Loop! Depth: " + str(depth))
                 return np.array([0, scores[0], scores[1]])
             else:
                 self.Loop[s] = 1
