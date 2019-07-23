@@ -92,6 +92,7 @@ class Coach():
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
             s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
+            self.mcts.Visited.append(s)
 
             # if action != self.game.getActionSize() - 1:
             #     if s not in self.mcts.C:
