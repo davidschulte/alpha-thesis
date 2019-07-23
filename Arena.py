@@ -45,7 +45,6 @@ class Arena():
         self.args = args
         self.display = display
 
-    @profile
     def playGame(self, lonely_player, turn_lonely, verbose=False):
         """
         Executes one episode of a game.
@@ -105,6 +104,8 @@ class Arena():
             assert(self.display)
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
+
+        print(board)
 
         return scores
 
