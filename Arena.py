@@ -84,7 +84,10 @@ class Arena():
                 self.display(board)
 
             if scores[curPlayer-1] == 0:
-                pi = players[curPlayer-1].getActionProb(self.game.getCanonicalForm(board, curPlayer), temp=1)
+                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
+                s = self.game.stringRepresentation(canonicalBoard)
+                players[curPlayer-1].Visited.append(s)
+                pi = players[curPlayer-1].getActionProb(canonicalBoard, temp=1)
                 action = np.random.choice(self.game.getActionSize(), p=pi)
             else:
                 action = self.game.getActionSize()-1

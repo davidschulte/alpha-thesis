@@ -41,7 +41,6 @@ class Coach():
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
         self.curPlayer = 1
 
-    @profile
     def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
@@ -106,7 +105,7 @@ class Coach():
                 scores_player_two = np.array([scores[1], scores[2], scores[0]])
                 scores_player_three = np.array([scores[2], scores[0], scores[1]])
                 scores_all = [scores, scores_player_two, scores_player_three]
-                print("GAME OVER!")
+                print("GAME OVER! Step" + str(episodeStep))
                 print(self.board)
                 return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
 

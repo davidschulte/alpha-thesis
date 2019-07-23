@@ -8,7 +8,7 @@ args = dotdict({
     'dropout': 0.3,
     'epochs': 1,
     'batch_size': 32,
-    'num_channels': 128,
+    'num_channels': 256,
 })
 
 
@@ -21,7 +21,7 @@ class NNetWrapper:
         self.dropout = 0.3
         self.epochs = 5
         self.batch_size = 64
-        self.num_channels = 128
+        self.num_channels = 256
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
 

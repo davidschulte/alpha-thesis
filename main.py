@@ -12,12 +12,12 @@ np.set_printoptions(threshold=sys.maxsize)
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 20,
+    'numEps': 50,
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 100000,
-    'numMCTSSims': 25,
-    'arenaCompare': 12,
+    'numMCTSSims': 30,
+    'arenaCompare': 6,
     'cpuct': 1.5,
 
     'checkpoint': 'checkpoint',
