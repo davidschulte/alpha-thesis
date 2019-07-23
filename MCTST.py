@@ -46,11 +46,9 @@ class MCTS():
             return probs
 
         # counts = [x**(1./temp) for x in counts]
-        test = sum(counts)
-        if test == 0:
-            print("ERROR")
-            print(canonicalBoard)
-            print(self.Nsa)
+        if sum(counts) == 0:
+            print("Random Move!")
+            counts = self.game.getValidMoves(canonicalBoard, 1)
 
         probs = [x/float(sum(counts)) for x in counts]
         # test = sum(probs)
@@ -82,8 +80,6 @@ class MCTS():
 
         scores = self.game.getGameEnded(canonicalBoard, True).astype('float16')
 
-        if s in self.Visited:
-            return np.array([0, scores[0], scores[1]])
 
 
         # if s in self.C and scores[0] == 0:
@@ -103,6 +99,9 @@ class MCTS():
         if depth == 0:
             self.Loop = {s: 1}
         else:
+            if s in self.Visited:
+                return np.array([0, scores[0], scores[1]])
+
             if s in self.Loop:
                 print("Pevented Loop! Depth: " + str(depth))
                 return np.array([0, scores[0], scores[1]])
