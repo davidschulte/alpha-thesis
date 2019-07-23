@@ -19,7 +19,7 @@ class NNetWrapper:
         self.action_size = game.getActionSize()
 
         self.dropout = 0.3
-        self.epochs = 10
+        self.epochs = 5
         self.batch_size = 64
         self.num_channels = 128
 
