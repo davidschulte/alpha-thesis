@@ -1,6 +1,6 @@
 from collections import deque
 from Arena import Arena
-from MCTS import MCTS
+from MCTST import MCTS
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
 import time, os, sys
