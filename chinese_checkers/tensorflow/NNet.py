@@ -21,11 +21,10 @@ class NNetWrapper:
         self.dropout = 0.5
         self.epochs = 5
         self.batch_size = 64
-        self.num_channels = 128
+        self.num_channels = 256
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
 
-        drop_out_rate = 0.3
         action_size = game.getActionSize()
 
         x = keras.layers.Reshape((self.board_y, self.board_x, 1))(inputs)
@@ -33,27 +32,27 @@ class NNetWrapper:
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3, padding='same')(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
-        x = keras.layers.Conv2D(self.num_channels, kernel_size=3, padding='same')(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=5, padding='same')(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
-        x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=5)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
 
-        x = keras.layers.Reshape(((self.board_y-4)*(self.board_x-4)*self.num_channels,))(x)
-
-        x = keras.layers.Dense(512)(x)
-        x = keras.layers.BatchNormalization()(x)
-        x = keras.layers.ReLU()(x)
-        x = keras.layers.Dropout(drop_out_rate)(x)
+        x = keras.layers.Reshape(((self.board_y-6)*(self.board_x-6)*self.num_channels,))(x)
 
         x = keras.layers.Dense(512)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
-        x = keras.layers.Dropout(args.dropout)(x)
+        x = keras.layers.Dropout(self.dropout)(x)
+
+        x = keras.layers.Dense(512)(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
+        x = keras.layers.Dropout(self.dropout)(x)
 
         pi = keras.layers.Dense(action_size)(x)
         pi = keras.layers.Softmax(name='pi')(pi)
