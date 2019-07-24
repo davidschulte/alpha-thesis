@@ -54,10 +54,10 @@ class NNetWrapper:
         x = keras.layers.ReLU()(x)
         x = keras.layers.Dropout(self.dropout)(x)
 
-        pi = keras.layers.Dense(action_size, activation='softmax', kernel_regularizer=keras.regularizers.l2(0.01), name='pi')(x)
+        pi = keras.layers.Dense(action_size, activation='softmax', kernel_regularizer=keras.regularizers.l2(0.1), name='pi')(x)
         # pi = keras.layers.Softmax(name='pi')(pi)
 
-        v = keras.layers.Dense(3, activation='relu', kernel_regularizer=keras.regularizers.l2(0.01), name='v')(x)
+        v = keras.layers.Dense(3, activation='relu', kernel_regularizer=keras.regularizers.l2(0.1), name='v')(x)
         # v = keras.layers.ReLU(name='v')(v)
         # v = keras.layers.Softmax()(v)
         # v = keras.layers.Lambda(lambda x: x * 3)(v)
