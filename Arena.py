@@ -1,7 +1,7 @@
 import numpy as np
 import itertools
 from pytorch_classification.utils import Bar, AverageMeter
-from MCTST import MCTS
+from MCTSTExperimental import MCTS
 import time
 import cProfile, pstats, io
 def profile(fnc):
