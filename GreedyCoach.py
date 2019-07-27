@@ -33,18 +33,14 @@ class Coach():
     This class executes the self-play + learning. It uses the functions defined
     in Game and NeuralNet. args are specified in main.py.
     """
-    def __init__(self, game, nnet, args):
+    def __init__(self, game, args):
         self.game = game
         self.board = self.game.getInitBoard()
-        self.nnet = nnet
-        self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
-        self.mcts = MCTS(self.game, self.nnet, self.args)
+        self.mcts = VeryGreedyActor(game)
         self.trainExamplesHistory = []    # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
         self.curPlayer = 1
-
-        self.greedy_actor = VeryGreedyActor(game)
 
     @profile
     def executeEpisode(self, first):
@@ -69,6 +65,7 @@ class Coach():
         episodeStep = 0
         scores = [0, 0, 0]
         self.game.reset_board()
+        random = False
 
         start_time = time.time()
         while True:
@@ -85,11 +82,9 @@ class Coach():
             if scores[self.curPlayer - 1] == 0:
                 # canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
-                # temp = 1
-                if first:
-                    pi = self.greedy_actor.getActionProb(self.game.getCanonicalForm(self.board, self.curPlayer), episodeStep < 10)
-                else:
-                    pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=1)
+                temp = 1
+                canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
+                pi = self.mcts.getActionProb(canonicalBoard, episodeStep < 10)
                 # print(max(pi))
                 sym = self.game.getSymmetries(self.board, pi)
                 for b,p in sym:
@@ -101,7 +96,7 @@ class Coach():
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
             s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
-            self.mcts.Visited.append((s, self.curPlayer))
+            # self.mcts.Visited.append((s, self.curPlayer))
 
             # if action != self.game.getActionSize() - 1:
             #     if s not in self.mcts.C:
@@ -147,8 +142,8 @@ class Coach():
                 end = time.time()
     
                 for eps in range(self.args.numEps):
-                    self.mcts = MCTS(self.game, self.nnet, self.args)   # reset search tree
-                    iterationTrainExamples += self.executeEpisode(i == 1)
+                    # self.mcts = MCTS(self.game, self.nnet2, self.args)   # reset search tree
+                    iterationTrainExamples += self.executeEpisode()
     
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
@@ -158,56 +153,56 @@ class Coach():
                     bar.next()
                 bar.finish()
 
-                # save the iteration examples to the history 
-                self.trainExamplesHistory.append(iterationTrainExamples)
-                
-            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-                print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
-                self.trainExamplesHistory.pop(0)
-            # backup history to a file
-            # NB! the examples were collected using the model from the previous iteration, so (i-1)  
-            self.saveTrainExamples(i-1)
-            
-            # shuffle examlpes before training
-            trainExamples = []
-            for e in self.trainExamplesHistory:
-                trainExamples.extend(e)
-            shuffle(trainExamples)
-
-            # training new network, keeping a copy of the old one
-            self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
-            self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
-            pmcts = MCTS(self.game, self.pnet, self.args)
-            
-            self.nnet.train(trainExamples)
-            nmcts = MCTS(self.game, self.nnet, self.args)
-
-            print('PITTING AGAINST PREVIOUS VERSION')
-            # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
-            #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
-            # arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
-            #               lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game, self.args)
-
-            arena = Arena(self.pnet, self.nnet, self.game, self.args)
-
-            scores = arena.playGames(self.args.arenaCompare)
-
-            # print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            # if pwins+nwins == 0 or float(nwins)/(pwins+nwins) < self.args.updateThreshold:
+            #     # save the iteration examples to the history
+            #     self.trainExamplesHistory.append(iterationTrainExamples)
+            #
+            # if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
+            #     print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
+            #     self.trainExamplesHistory.pop(0)
+            # # backup history to a file
+            # # NB! the examples were collected using the model from the previous iteration, so (i-1)
+            # self.saveTrainExamples(i-1)
+            #
+            # # shuffle examlpes before training
+            # trainExamples = []
+            # for e in self.trainExamplesHistory:
+            #     trainExamples.extend(e)
+            # shuffle(trainExamples)
+            #
+            # # training new network, keeping a copy of the old one
+            # self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
+            # self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
+            # pmcts = MCTS(self.game, self.pnet, self.args)
+            #
+            # self.nnet.train(trainExamples)
+            # nmcts = MCTS(self.game, self.nnet, self.args)
+            #
+            # print('PITTING AGAINST PREVIOUS VERSION')
+            # # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
+            # #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
+            # # arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
+            # #               lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game, self.args)
+            #
+            # arena = Arena(self.pnet, self.nnet, self.game, self.args)
+            #
+            # scores = arena.playGames(self.args.arenaCompare)
+            #
+            # # print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
+            # # if pwins+nwins == 0 or float(nwins)/(pwins+nwins) < self.args.updateThreshold:
+            # #     print('REJECTING NEW MODEL')
+            # #     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            # # else:
+            # #     print('ACCEPTING NEW MODEL')
+            # #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+            # #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+            #
+            # if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
             #     print('REJECTING NEW MODEL')
-            #     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
+            #     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
             # else:
             #     print('ACCEPTING NEW MODEL')
             #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
-
-            if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
-                print('REJECTING NEW MODEL')
-                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
-            else:
-                print('ACCEPTING NEW MODEL')
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
+            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.h5'

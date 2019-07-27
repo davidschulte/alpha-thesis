@@ -8,7 +8,6 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -44,10 +43,8 @@ class Coach():
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
         self.curPlayer = 1
 
-        self.greedy_actor = VeryGreedyActor(game)
-
     @profile
-    def executeEpisode(self, first):
+    def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
@@ -68,6 +65,8 @@ class Coach():
         self.curPlayer = 1
         episodeStep = 0
         scores = [0, 0, 0]
+        # greedy_scores = np.array([0, 0, 0])
+        # greedy_actor = GreedyActor(self.game)
         self.game.reset_board()
 
         start_time = time.time()
@@ -85,11 +84,9 @@ class Coach():
             if scores[self.curPlayer - 1] == 0:
                 # canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
-                # temp = 1
-                if first:
-                    pi = self.greedy_actor.getActionProb(self.game.getCanonicalForm(self.board, self.curPlayer), episodeStep < 10)
-                else:
-                    pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=1)
+                temp = 1
+
+                pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=temp)
                 # print(max(pi))
                 sym = self.game.getSymmetries(self.board, pi)
                 for b,p in sym:
@@ -148,7 +145,7 @@ class Coach():
     
                 for eps in range(self.args.numEps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)   # reset search tree
-                    iterationTrainExamples += self.executeEpisode(i == 1)
+                    iterationTrainExamples += self.executeEpisode()
     
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)

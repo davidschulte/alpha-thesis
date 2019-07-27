@@ -169,3 +169,6 @@ class ChineseCheckersGame(Game):
 
     def reset_board(self):
         self.b = Board()
+
+    def get_board(self):
+        return self.b

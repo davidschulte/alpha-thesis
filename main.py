@@ -12,7 +12,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 50,
+    'numEps': 1,
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 100000,
@@ -21,7 +21,7 @@ args = dotdict({
     'cpuct': 6,
 
     'checkpoint': 'checkpoint',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('checkpoint','checkpoint_0.h5'),
     'numItersForTrainExamplesHistory': 20,
 
@@ -35,6 +35,7 @@ if __name__=="__main__":
     #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
     c = Coach(g, nnet, args)
+    # c = Coach(g, args)
     if args.load_model:
         print("Load trainExamples from file")
         c.loadTrainExamples()
