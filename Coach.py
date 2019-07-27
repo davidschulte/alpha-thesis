@@ -82,17 +82,15 @@ class Coach():
                 # print(greedy_scores)
 
             if scores[self.curPlayer - 1] == 0:
-                # canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
+                canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
                 # temp = 1
                 if first:
-                    pi = self.greedy_actor.getActionProb(self.game.getCanonicalForm(self.board, self.curPlayer), episodeStep < 10)
+                    pi = self.greedy_actor.getActionProb(canonicalBoard, episodeStep < 10)
                 else:
                     pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=1)
                 # print(max(pi))
-                sym = self.game.getSymmetries(self.board, pi)
-                for b,p in sym:
-                    trainExamples.append([b, self.curPlayer, p, None])
+                trainExamples.append([canonicalBoard, self.curPlayer, pi, None])
 
                 action = np.random.choice(len(pi), p=pi)
             else:
@@ -141,14 +139,14 @@ class Coach():
             # examples of the iteration
             if not self.skipFirstSelfPlay or i>1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
-    
-                eps_time = AverageMeter()
-                bar = Bar('Self Play', max=self.args.numEps)
-                end = time.time()
+
                 num_eps = self.args.numEps
                 if i == 1:
                     num_eps = 500
-    
+                eps_time = AverageMeter()
+                bar = Bar('Self Play', max=num_eps)
+                end = time.time()
+
                 for eps in range(num_eps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)   # reset search tree
                     iterationTrainExamples += self.executeEpisode(i == 1)
