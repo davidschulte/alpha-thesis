@@ -110,7 +110,7 @@ class MCTS():
             if (s, player) in self.Loop:
                 print("Prevented Loop! Depth: " + str(depth))
                 # scores[player-1] = 0
-                # return scores
+                return None
             else:
                 self.Loop.append((s, player))
 
@@ -187,13 +187,15 @@ class MCTS():
 
         scores = self.search(next_s, next_player, depth + 1)
 
-        if (s, a, player) in self.Qsa:
-            self.Qsa[(s, a, player)] = (self.Nsa[(s, a, player)] * self.Qsa[(s, a, player)] + scores[player-1]) / (self.Nsa[(s, a, player)] + 1)
-            self.Nsa[(s, a, player)] += 1
+        if scores is not None:
 
-        else:
-            self.Qsa[(s, a, player)] = scores[player-1]
-            self.Nsa[(s, a, player)] = 1
+            if (s, a, player) in self.Qsa:
+                self.Qsa[(s, a, player)] = (self.Nsa[(s, a, player)] * self.Qsa[(s, a, player)] + scores[player-1]) / (self.Nsa[(s, a, player)] + 1)
+                self.Nsa[(s, a, player)] += 1
+
+            else:
+                self.Qsa[(s, a, player)] = scores[player-1]
+                self.Nsa[(s, a, player)] = 1
 
         self.Ns[(s, player)] += 1
 
