@@ -145,8 +145,11 @@ class Coach():
                 eps_time = AverageMeter()
                 bar = Bar('Self Play', max=self.args.numEps)
                 end = time.time()
+                num_eps = self.args.numEps
+                if i == 1:
+                    num_eps = 500
     
-                for eps in range(self.args.numEps):
+                for eps in range(num_eps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)   # reset search tree
                     iterationTrainExamples += self.executeEpisode(i == 1)
     
