@@ -73,9 +73,7 @@ class Arena():
 
             if it % 100 == 0:
                 print(it)
-
-                if it % 1000 == 0:
-                    print(board)
+                print(board)
 
             if verbose:
                 assert(self.display)
@@ -83,10 +81,10 @@ class Arena():
                 self.display(board)
 
             if scores[curPlayer-1] == 0:
-                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                s = self.game.stringRepresentation(canonicalBoard)
-                players[curPlayer-1].Visited.append(s)
-                pi = players[curPlayer-1].getActionProb(canonicalBoard, temp=1)
+                # canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
+                # s = self.game.stringRepresentation(canonicalBoard)
+                # players[curPlayer-1].Visited.append(s)
+                pi = players[curPlayer-1].getActionProb(board, curPlayer, temp=1)
                 action = np.random.choice(self.game.getActionSize(), p=pi)
             else:
                 action = self.game.getActionSize()-1
