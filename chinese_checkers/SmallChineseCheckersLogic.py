@@ -80,6 +80,20 @@ ROTATION_LEFT = [  0,  0,  0,  0,  0,  0,  0,  0,  0,117,  0,  0,  0,
            0,  0,  0, 63, 50,  0,  0,  0,  0,  0,  0,  0,  0,
            0,  0,  0, 51,  0,  0,  0,  0,  0,  0,  0,  0,  0]
 
+ROTATION_RIGHT = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 126, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 113, 125, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 100, 112, 124, 0, 0, 0,
+           0, 0, 0, 51, 63, 75, 87, 99, 111, 123, 135, 147, 159,
+           0, 0, 0, 50, 62, 74, 86, 98, 110, 122, 134, 146, 0,
+           0, 0, 0, 49, 61, 73, 85, 97, 109, 121, 133, 0, 0,
+           0, 0, 0, 48, 60, 72, 84, 96, 108, 120, 0, 0, 0,
+           0, 0, 35, 47, 59, 71, 83, 95, 107, 119, 0, 0, 0,
+           0, 22, 34, 46, 58, 70, 82, 94, 106, 118, 0, 0, 0,
+           9, 21, 33, 45, 57, 69, 81, 93, 105, 117, 0, 0, 0,
+           0, 0, 0, 44, 56, 68, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 43, 55, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 
 
 class Board():
@@ -146,6 +160,8 @@ class Board():
 
 
     def move(self, y_start, x_start, y_end, x_end, board, player):
+        if board[y_start, x_start] == EMPTY:
+            print("DEBUG")
         board[y_start, x_start] = EMPTY
         board[y_end, x_end] = player
         return board
@@ -261,13 +277,12 @@ class Board():
     def rotate_board(self, rotation_board, start_player, end_player):
         rotation_board = rotation_board.reshape(13 * 13)
 
-        if start_player < end_player:
-            rotation_num = end_player - start_player
+        if self.get_next_player(start_player) == end_player:
+            right = False
         else:
-            rotation_num = 3 - (start_player - end_player)
+            right = True
 
-        for _ in range(rotation_num):
-            rotation_board = self.rotate_left(rotation_board)
+        rotation_board = self.rotate(rotation_board, right)
 
         return rotation_board.reshape(13, 13)
         # rotated_board = np.copy(board)
@@ -276,10 +291,14 @@ class Board():
         #
         # return rotated_board
 
-    def rotate_left(self, rotation_board):
+    def rotate(self, rotation_board, right):
+        if right:
+            rotation_index_board = ROTATION_RIGHT
+        else:
+            rotation_index_board = ROTATION_LEFT
         rotated_board = np.copy(START.reshape(13 * 13))
         for i in range(len(rotation_board)):
             if rotation_board[i] != OUT:
-                rotated_board[ROTATION_LEFT[i]] = rotation_board[i]
+                rotated_board[rotation_index_board[i]] = rotation_board[i]
 
         return rotated_board

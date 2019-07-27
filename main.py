@@ -2,7 +2,7 @@
 
 from Coach import Coach
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
-from chinese_checkers.tensorflow.NNet import NNetWrapper as nn
+from chinese_checkers.tensorflow.NNetExperimental import NNetWrapper as nn
 from utils import *
 import numpy as np
 import sys
@@ -16,9 +16,9 @@ args = dotdict({
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 100000,
-    'numMCTSSims': 30,
+    'numMCTSSims': 50,
     'arenaCompare': 6,
-    'cpuct': 1.5,
+    'cpuct': 20,
 
     'checkpoint': 'checkpoint',
     'load_model': True,

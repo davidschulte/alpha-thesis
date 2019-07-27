@@ -99,8 +99,8 @@ class MCTS():
         if depth == 0:
             self.Loop = {s: 1}
         else:
-            if s in self.Visited:
-                return np.array([0, scores[0], scores[1]])
+            # if s in self.Visited:
+            #     return np.array([0, scores[0], scores[1]])
 
             if s in self.Loop:
                 print("Pevented Loop! Depth: " + str(depth))
@@ -161,8 +161,17 @@ class MCTS():
                     u = u
 
                 if u > cur_best:
+                    if exploitation > 0:
+                        expl = True
+                    else:
+                        expl = False
                     cur_best = u
                     best_act = a
+
+        if expl:
+            print("X")
+        else:
+            print("O")
 
         a = best_act
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)

@@ -8,6 +8,8 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
+# from chinese_checkers.GreedyActorExperimental import GreedyActor
+
 def profile(fnc):
     """A decorator that uses cProfile to profile a function"""
 
@@ -41,6 +43,7 @@ class Coach():
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
         self.curPlayer = 1
 
+    @profile
     def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
@@ -62,6 +65,8 @@ class Coach():
         self.curPlayer = 1
         episodeStep = 0
         scores = [0, 0, 0]
+        # greedy_scores = np.array([0, 0, 0])
+        # greedy_actor = GreedyActor(self.game)
         self.game.reset_board()
 
         start_time = time.time()
@@ -72,16 +77,18 @@ class Coach():
                 end_time = time.time()
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
-                if episodeStep % 1000 == 0:
-                    print(self.board)
+                print(self.board)
+                # _, new_greedy = greedy_actor.predict(self.board, 1)
+                # print(greedy_scores)
 
             if scores[self.curPlayer - 1] == 0:
-                canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
+                # canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
                 temp = 1
 
-                pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
-                sym = self.game.getSymmetries(canonicalBoard, pi)
+                pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=temp)
+                # print(max(pi))
+                sym = self.game.getSymmetries(self.board, pi)
                 for b,p in sym:
                     trainExamples.append([b, self.curPlayer, p, None])
 
@@ -91,7 +98,7 @@ class Coach():
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
             s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
-            self.mcts.Visited.append(s)
+            self.mcts.Visited.append((s, self.curPlayer))
 
             # if action != self.game.getActionSize() - 1:
             #     if s not in self.mcts.C:
@@ -100,6 +107,13 @@ class Coach():
             #         self.mcts.C[s] += 1
 
             scores = self.game.getGameEnded(self.board, False)
+            # _, new_greedy = greedy_actor.predict(self.board, 1)
+            # for i in range(3):
+            #     if new_greedy[i] < greedy_scores[i]:
+            #         print('-')
+            #     elif new_greedy[i] > greedy_scores[i]:
+            #         print('+')
+            # greedy_scores = new_greedy
 
             if np.count_nonzero(scores) == 2:
                 scores_player_two = np.array([scores[1], scores[2], scores[0]])
