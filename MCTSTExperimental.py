@@ -42,14 +42,17 @@ class MCTS():
             counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in
                       range(self.game.getActionSize())]
             # test = sum(counts)
-            if np.count_nonzero(np.array(counts)) < 3 and i == self.args.numMCTSSims - 2:
-                print("DEBUG")
+            # nonzeros = np.count_nonzero(counts)
+            # if nonzeros < 3 and i == self.args.numMCTSSims - 2:
+            #     print("DEBUG")
+
             self.search(board, player, 0)
 
+        # print(nonzeros)
         counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
         # test = sum(counts)
-        if np.count_nonzero(np.array(counts)) < 3:
-            print("DEBUG")
+        # if np.count_nonzero(np.array(counts)) < 3:
+        #     print("DEBUG")
 
         if temp == 0:
             bestA = np.argmax(counts)

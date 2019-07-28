@@ -181,6 +181,8 @@ class Board():
         else:
             scores = self.scores
 
+        first_found = False
+
         still_playing = []
         for player in [1, 2, 3]:
             if scores[player - 1] == 0:
@@ -195,9 +197,13 @@ class Board():
             if self.get_done(board, player, color_matters):
                 scores[player - 1] = prize
                 still_playing.remove(player)
+                first_found = True
 
         if not temporary:
             self.scores_temporary = np.copy(scores)
+
+        if first_found:
+            return self.get_win_state(board, temporary)
 
         return scores
 

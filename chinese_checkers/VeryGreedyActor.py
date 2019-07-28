@@ -19,7 +19,7 @@ class VeryGreedyActor:
                     if progress > 0:
                         probs[move] = progress
                     else:
-                        probs[move] = 0.1
+                        probs[move] = 0.5
 
         sum_probs = sum(probs)
         probs = [x/float(sum_probs) for x in probs]
