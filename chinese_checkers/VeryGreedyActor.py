@@ -18,8 +18,10 @@ class VeryGreedyActor:
                     progress = y_start - y_end
                     if progress > 0:
                         probs[move] = progress
-                    else:
+                    elif progress == 0:
                         probs[move] = 0.5
+                    else:
+                        probs[move] = 0.1
 
         sum_probs = sum(probs)
         probs = [x/float(sum_probs) for x in probs]
