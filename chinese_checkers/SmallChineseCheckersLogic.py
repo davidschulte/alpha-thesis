@@ -264,6 +264,8 @@ class Board():
         y_fits = np.where(y_coordinates == y)
         x_fits = np.where(x_coordinates == x)
         index_list = np.intersect1d(y_fits, x_fits)
+        if len(index_list) == 0:
+            print("ERROR: y = " + str(y) + " x = " + str(x))
         return index_list[0]
 
     def encode_coordinates_grid(self, y, x):
@@ -272,6 +274,8 @@ class Board():
         y_fits = np.where(y_coordinates == y)
         x_fits = np.where(x_coordinates == x)
         index_list = np.intersect1d(y_fits, x_fits)
+        if len(index_list) == 0:
+            print("ERROR: y = " + str(y) + " x = " + str(x))
         return grid_no, index_list[0]
 
     def rotate_board(self, rotation_board, start_player, end_player):

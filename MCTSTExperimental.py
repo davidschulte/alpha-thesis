@@ -52,7 +52,7 @@ class MCTS():
 
         # counts = [x**(1./temp) for x in counts]
         if sum(counts) == 0:
-            print("Random Move!")
+            print("Random Move by " + str(player) + "!")
             counts = self.game.getValidMoves(board, player)
 
         probs = [x / float(sum(counts)) for x in counts]

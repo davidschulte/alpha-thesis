@@ -22,7 +22,7 @@ args = dotdict({
 
     'checkpoint': 'checkpoint',
     'load_model': False,
-    'load_folder_file': ('checkpoint','checkpoint_0.h5'),
+    'load_folder_file': ('checkpoint','temp.h5'),
     'numItersForTrainExamplesHistory': 20,
 
 })
@@ -31,8 +31,8 @@ if __name__=="__main__":
     g = Game()
     nnet = nn(g)
 
-    # if args.load_model:
-    #     nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    if args.load_model:
+        nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
     c = Coach(g, nnet, args)
     # c = Coach(g, args)
