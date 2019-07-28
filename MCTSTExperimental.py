@@ -35,10 +35,17 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         self.reset()
-        for i in range(self.args.numMCTSSims):
-            self.search(board, player, 0)
 
         s = self.game.stringRepresentation(board)
+
+        for i in range(self.args.numMCTSSims):
+            counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in
+                      range(self.game.getActionSize())]
+            # test = sum(counts)
+            if np.count_nonzero(np.array(counts)) < 3 and i == self.args.numMCTSSims - 2:
+                print("DEBUG")
+            self.search(board, player, 0)
+
         counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
         # test = sum(counts)
         if np.count_nonzero(np.array(counts)) < 3:

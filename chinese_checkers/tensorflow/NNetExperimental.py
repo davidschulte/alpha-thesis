@@ -18,7 +18,7 @@ class NNetWrapper:
         self.board_x, self.board_y = game.getBoardSize()
         self.action_size = game.getActionSize()
 
-        self.dropout = 0.5
+        self.dropout = 0.3
         self.epochs = 5
         self.batch_size = 64
         self.num_channels = 256
@@ -33,6 +33,12 @@ class NNetWrapper:
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Conv2D(self.num_channels, kernel_size=5, padding='same')(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=5)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.ReLU()(x)
         x = keras.layers.Conv2D(self.num_channels, kernel_size=3)(x)
