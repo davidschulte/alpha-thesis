@@ -73,7 +73,7 @@ class Coach():
         while True:
             episodeStep += 1
 
-            if episodeStep % 100 == 0 and not first:
+            if episodeStep % 100 == 0:
                 end_time = time.time()
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
                 start_time = end_time
@@ -85,7 +85,7 @@ class Coach():
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
                 # temp = 1
-                if first:
+                if first and not self.args.load_model:
                     pi = self.greedy_actor.getActionProb(canonicalBoard, episodeStep < 10)
                 else:
                     pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=1)
