@@ -198,15 +198,16 @@ class MCTS():
 
         scores = self.search(next_s, next_player, depth + 1)
 
-        if scores is not None:
 
-            if (s, a, player) in self.Qsa:
+        if (s, a, player) in self.Qsa:
+            if scores is not None:
                 self.Qsa[(s, a, player)] = (self.Nsa[(s, a, player)] * self.Qsa[(s, a, player)] + scores[player-1]) / (self.Nsa[(s, a, player)] + 1)
-                self.Nsa[(s, a, player)] += 1
+            self.Nsa[(s, a, player)] += 1
 
-            else:
+        else:
+            if scores is not None:
                 self.Qsa[(s, a, player)] = scores[player-1]
-                self.Nsa[(s, a, player)] = 1
+            self.Nsa[(s, a, player)] = 1
 
         self.Ns[(s, player)] += 1
 
