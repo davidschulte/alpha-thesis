@@ -21,7 +21,7 @@ args = dotdict({
     'cpuct': 8,
 
     'checkpoint': 'checkpoint',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('checkpoint','temp.h5'),
     'numItersForTrainExamplesHistory': 20,
 
@@ -36,7 +36,7 @@ if __name__=="__main__":
 
     c = Coach(g, nnet, args)
     # c = Coach(g, args)
-    # if args.load_model:
-    #     print("Load trainExamples from file")
-    #     c.loadTrainExamples()
+    if args.load_model:
+        print("Load trainExamples from file")
+        c.loadTrainExamples()
     c.learn()
