@@ -117,7 +117,7 @@ class MCTS():
             self.Loop = [(s, player)]
         else:
             if s in self.Visited:
-                print("VISITED")
+                # print("VISITED")
                 scores[self.game.get_board().get_previous_player(player) - 1] = 0
                 return scores
             if (s, player) in self.Loop:
