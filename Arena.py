@@ -68,7 +68,7 @@ class Arena():
 
         scores = np.array([0, 0, 0])
         self.game.reset_board()
-        while np.count_nonzero(scores) < 2:
+        while np.count_nonzero(scores) < 2 and it < 1000:
             it += 1
 
             if it % 100 == 0:
@@ -86,6 +86,7 @@ class Arena():
                 # players[curPlayer-1].Visited.append(s)
                 pi = players[curPlayer-1].getActionProb(board, curPlayer, temp=1)
                 action = np.random.choice(self.game.getActionSize(), p=pi)
+                it += 1
             else:
                 action = self.game.getActionSize()-1
 

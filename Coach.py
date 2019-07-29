@@ -71,9 +71,7 @@ class Coach():
         self.mcts.Visited = []
 
         start_time = time.time()
-        while True:
-            episodeStep += 1
-
+        while np.count_nonzero(scores) < 2 and episodeStep < 1000:
             if episodeStep % 100 == 0:
                 end_time = time.time()
                 print("Step " + str(episodeStep) + ": " + str(end_time-start_time) + "s")
@@ -86,6 +84,7 @@ class Coach():
             self.mcts.Visited.append(s)
 
             if scores[self.curPlayer - 1] == 0:
+                episodeStep += 1
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
                 # temp = 1
@@ -118,14 +117,13 @@ class Coach():
             #         print('+')
             # greedy_scores = new_greedy
 
-            if np.count_nonzero(scores) == 2:
-                scores_player_two = np.array([scores[1], scores[2], scores[0]])
-                scores_player_three = np.array([scores[2], scores[0], scores[1]])
-                scores_all = [scores, scores_player_two, scores_player_three]
-                if not first:
-                    print("GAME OVER! Step" + str(episodeStep))
-                    print(self.board)
-                return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
+        scores_player_two = np.array([scores[1], scores[2], scores[0]])
+        scores_player_three = np.array([scores[2], scores[0], scores[1]])
+        scores_all = [scores, scores_player_two, scores_player_three]
+        if not first:
+            print("GAME OVER! Step" + str(episodeStep))
+            print(self.board)
+        return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
 
     def learn(self):
         """
