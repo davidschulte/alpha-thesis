@@ -210,6 +210,12 @@ class Board():
     def get_next_player(self, player):
         return player % 3 + 1
 
+    def get_previous_player(self, player):
+        previous = player - 1
+        if previous == 0:
+            previous = 3
+        return previous
+
     def get_legal_moves(self, board, player):
         legal_moves_direct = []
         legal_moves_jumping = []
