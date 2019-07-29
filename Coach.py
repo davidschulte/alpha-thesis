@@ -83,7 +83,7 @@ class Coach():
                 # print(greedy_scores)
 
             s = self.game.stringRepresentation(self.board)
-            self.mcts.Visited.append((s, self.curPlayer))
+            self.mcts.Visited.append(s)
 
             if scores[self.curPlayer - 1] == 0:
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
