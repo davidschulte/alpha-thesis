@@ -68,6 +68,7 @@ class Coach():
         episodeStep = 0
         scores = [0, 0, 0]
         self.game.reset_board()
+        self.mcts.Visited = []
 
         start_time = time.time()
         while True:
@@ -80,6 +81,9 @@ class Coach():
                 print(self.board)
                 # _, new_greedy = greedy_actor.predict(self.board, 1)
                 # print(greedy_scores)
+
+            s = self.game.stringRepresentation(self.board)
+            self.mcts.Visited.append((s, self.curPlayer))
 
             if scores[self.curPlayer - 1] == 0:
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
@@ -97,8 +101,7 @@ class Coach():
                 action = self.game.getActionSize() - 1
 
             self.board, self.curPlayer = self.game.getNextState(self.board, self.curPlayer, action)
-            s = self.game.stringRepresentation(self.game.getCanonicalForm(self.board, self.curPlayer))
-            self.mcts.Visited.append((s, self.curPlayer))
+
 
             # if action != self.game.getActionSize() - 1:
             #     if s not in self.mcts.C:
