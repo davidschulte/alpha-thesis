@@ -143,7 +143,7 @@ class Coach():
 
                 num_eps = self.args.numEps
                 if i == 1 and not self.args.load_model:
-                    num_eps = 500
+                    num_eps = 1000
                 eps_time = AverageMeter()
                 bar = Bar('Self Play', max=num_eps)
                 end = time.time()
