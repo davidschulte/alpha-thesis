@@ -21,6 +21,7 @@ class MCTS():
         # self.C = {}
         self.Loop = {}
         self.Visited = []
+        self.start_player = 0
 
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
@@ -35,6 +36,8 @@ class MCTS():
                    proportional to Nsa[(s,a)]**(1./temp)
         """
         self.reset()
+
+        self.start_player = player
 
         s = self.game.stringRepresentation(board)
 
@@ -115,14 +118,14 @@ class MCTS():
         else:
             if (s, player) in self.Loop:
                 print("Prevented Loop! Depth: " + str(depth))
-                scores[self.game.bet_board().get_previous_player(player)-1] = 0
+                scores[self.start_player-1] = 0
                 return scores
             else:
                 self.Loop.append((s, player))
 
         if s in self.Visited:
             print("VISITED")
-            scores[self.game.bet_board().get_previous_player(player)-1] = 0
+            scores[self.start_player-1] = 0
             return scores
 
         if (s, player) not in self.Ps or depth > DEPTHMAX:
