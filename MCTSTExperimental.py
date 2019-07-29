@@ -115,14 +115,14 @@ class MCTS():
         else:
             if (s, player) in self.Loop:
                 print("Prevented Loop! Depth: " + str(depth))
-                scores[player-1] = 0
+                scores[self.game.bet_board().get_previous_player(player)-1] = 0
                 return scores
             else:
                 self.Loop.append((s, player))
 
         if s in self.Visited:
             print("VISITED")
-            scores[player-1] = 0
+            scores[self.game.bet_board().get_previous_player(player)-1] = 0
             return scores
 
         if (s, player) not in self.Ps or depth > DEPTHMAX:
