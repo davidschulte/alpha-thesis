@@ -144,7 +144,7 @@ class MCTS():
                 # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
                 print("All valid moves were masked, do workaround.")
                 self.Ps[(s, player)] = self.Ps[(s, player)] + valids
-                self.Ps[(s, player)] /= np.sum(self.Ps[s])
+                self.Ps[(s, player)] /= np.sum(self.Ps[(s, player)])
 
             self.Vs[(s, player)] = valids
             self.Ns[(s, player)] = 0
