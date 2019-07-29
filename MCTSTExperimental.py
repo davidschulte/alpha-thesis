@@ -115,16 +115,15 @@ class MCTS():
         else:
             if (s, player) in self.Loop:
                 print("Prevented Loop! Depth: " + str(depth))
-                # scores[player-1] = 0
-                return None
+                scores[player-1] = 0
+                return scores
             else:
                 self.Loop.append((s, player))
 
         if s in self.Visited:
             print("VISITED")
-            return None
-            # scores[player-1] = 0
-            # return scores
+            scores[player-1] = 0
+            return scores
 
         if (s, player) not in self.Ps or depth > DEPTHMAX:
             if depth > DEPTHMAX:
