@@ -2,7 +2,7 @@
 
 from Coach import Coach
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
-from chinese_checkers.tensorflow.NNetExperimental import NNetWrapper as nn
+from chinese_checkers.tensorflow.ResNet import NNetWrapper as nn
 from utils import *
 import numpy as np
 import sys
@@ -36,7 +36,7 @@ if __name__=="__main__":
 
     c = Coach(g, nnet, args)
     # c = Coach(g, args)
-    # if args.load_model:
-    #     print("Load trainExamples from file")
-    #     c.loadTrainExamples()
+    if args.load_model:
+        print("Load trainExamples from file")
+        c.loadTrainExamples()
     c.learn()

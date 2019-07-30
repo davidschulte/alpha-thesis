@@ -9,6 +9,7 @@ from random import shuffle
 import time
 import cProfile, pstats, io
 from chinese_checkers.VeryGreedyActor import VeryGreedyActor
+from chinese_checkers.GUI import GUI
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -43,6 +44,7 @@ class Coach():
         self.trainExamplesHistory = []    # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False # can be overriden in loadTrainExamples()
         self.curPlayer = 1
+        self.GUI = GUI(1)
 
         self.greedy_actor = VeryGreedyActor(game)
 
@@ -84,6 +86,7 @@ class Coach():
             self.mcts.Visited.append(s)
 
             if scores[self.curPlayer - 1] == 0:
+                self.GUI.draw_board(self.board, episodeStep)
                 episodeStep += 1
                 canonicalBoard = self.game.getCanonicalForm(self.board, self.curPlayer)
                 # temp = int(episodeStep < self.args.tempThreshold)
