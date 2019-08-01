@@ -56,15 +56,15 @@ class Coach():
 
         self.greedy_actor = VeryGreedyActor(game)
 
-    @profile
     def execute_episodes(self):
         it = 1
         while False in self.all_done:
             print(it)
-            if it == 1:
-                requests = self.get_first_requests()
-            else:
-                requests = self.get_requests()
+            # if it == 1:
+            #     requests = self.get_first_requests()
+            # else:
+            #     requests = self.get_requests()
+            requests = self.get_requests()
 
             update_indices = []
             valid_requests = []
@@ -80,7 +80,6 @@ class Coach():
         return self.compile_train_examples()
 
 
-
     def get_requests(self):
         all_request_states = [None] * self.args.parallel_block
         for n in range(self.args.parallel_block):
@@ -89,30 +88,27 @@ class Coach():
                 scores = self.all_scores[n]
                 while not self.all_done[n] and request_state is None:
                     episode_step = self.all_episode_steps[n]
-                    if episode_step > 600:
-                        self.all_done[n] = True
                     game = self.games[n]
                     mcts = self.mctss[n]
                     board = self.all_boards[n]
                     cur_player = self.all_cur_players[n]
-                    mcts.search(board, cur_player, 0)
-                    mcts.add_iter()
+                    # mcts.search(board, cur_player, 0)
+                    # mcts.add_iter()
                     if mcts.get_done():
                         pi = mcts.get_counts(board, cur_player)
                         action = np.random.choice(len(pi), p=pi)
                         board, cur_player = game.getNextState(board, cur_player, action)
-                        episode_step += 1
                         scores = game.getGameEnded(board, False)
-
-                        if np.count_nonzero(scores) == 2:
+                        self.all_episode_steps[n] += 1
+                        if self.all_episode_steps[n] > 600 or np.count_nonzero(scores) == 2:
                             self.all_done[n] = True
                         else:
                             if scores[cur_player-1] != 0:
                                 action = game.getActionSize()-1
                                 _, cur_player = game.getNextState(board, cur_player, action)
-                            mcts.reset()
                     if not self.all_done[n]:
-                        request_state = mcts.get_next_leaf(board, cur_player, 0)
+                        request_state = mcts.search(board, cur_player, 0)
+
                 self.all_boards[n] = board
                 self.all_episode_steps[n] = episode_step
                 self.all_scores[n] = scores
@@ -121,12 +117,12 @@ class Coach():
 
         return all_request_states
 
-    def get_first_requests(self):
-        all_request_states = [None] * self.args.parallel_block
-        for n in range(self.args.parallel_block):
-            mcts = self.mctss[n]
-            all_request_states[n] = mcts.get_next_leaf(self.all_boards[n], self.all_cur_players[n], 0)
-        return all_request_states
+    # def get_first_requests(self):
+    #     all_request_states = [None] * self.args.parallel_block
+    #     for n in range(self.args.parallel_block):
+    #         mcts = self.mctss[n]
+    #         all_request_states[n] = mcts.get_next_leaf(self.all_boards[n], self.all_cur_players[n], 0)
+    #     return all_request_states
 
     def update_predictions(self, pis, vs, update_indices):
         for i in range(len(update_indices)):
