@@ -21,6 +21,21 @@ PRIZES = [GOLD, SILVER, BRONZE]
 ACTION_SIZE_OFFSET = [49 * 6, 16 * 16, 12 * 12, 12 * 12, 9 * 9]
 ACTION_SUB_SPACE = [6, 16, 12, 12, 9]
 
+                       # 0  1  2  3  4  5  6  7  8  9 10 11 12
+EMPTY_BOARD = np.array([[4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4], #0
+                        [4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4], #1
+                        [4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4], #2
+                        [4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], #3
+                        [4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4], #4
+                        [4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4], #5
+                        [4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #6
+                        [4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #7
+                        [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #8
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #9
+                        [4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4], #10
+                        [4, 4, 4, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4], #11
+                        [4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4]]).astype('int8')#12.
+
                  # 0  1  2  3  4  5  6  7  8  9 10 11 12
 START = np.array([[4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4], #0
                   [4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4], #1
@@ -123,6 +138,33 @@ class Board():
 
         return yN, xN, board[yN, xN]
 
+    def step(self, y, x, direction, board, step_size):
+        if y < step_size and direction in [LEFT_UP, RIGHT_UP]:
+            return 0, 0, OUT
+        if y > HEIGHT - 1 - step_size and direction in [LEFT_DOWN, RIGHT_DOWN]:
+            return 0, 0, OUT
+        if x < step_size and direction in [LEFT, LEFT_DOWN]:
+            return 0, 0, OUT
+        if x > WIDTH - 1 - step_size and direction in [RIGHT, RIGHT_UP]:
+            return 0, 0, OUT
+
+        yN, xN = y + step_size * MOVES[direction][0], x + step_size * MOVES[direction][1]
+
+        if GRID[yN, xN] == 0:
+            return 0, 0, OUT
+
+        return yN, xN, board[yN, xN]
+
+    def get_jumps(self, y, x, board):
+        jumps = []
+        for direction in range(6):
+            y_nn, x_nn, field_nn = self.step(y, x, direction, board, 2)
+            if field_nn == EMPTY:
+                _, _, field_n = self.step(y, x, direction, board, 1)
+                if field_n in [1, 2, 3]:
+                    jumps.append((y_nn, x_nn))
+        return jumps
+
     def get_neighbors(self, y, x, board):
         neighbors = []
         for dir in [LEFT, RIGHT, LEFT_UP, RIGHT_UP, LEFT_DOWN, RIGHT_DOWN]:
@@ -140,16 +182,34 @@ class Board():
 
         return reachables
 
-    def get_reachables_jump(self, y, x, board, reachables=[]):
-        neighbors = self.get_neighbors(y, x, board)
-        for yN, xN, valN, dir in neighbors:
-            if valN != EMPTY:
-                (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
-                if (yNN, xNN) not in reachables and valNN == EMPTY and self.right_zone(y, x, yNN, xNN):
-                    reachables.append((yNN, xNN))
-                    reachables = list(set().union(reachables, self.get_reachables_jump(yNN, xNN, board, reachables)))
+    # def get_reachables_jump(self, y, x, board, reachables=[]):
+    #     neighbors = self.get_neighbors(y, x, board)
+    #     for yN, xN, valN, dir in neighbors:
+    #         if valN != EMPTY:
+    #             (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
+    #             if (yNN, xNN) not in reachables and valNN == EMPTY and self.right_zone(y, x, yNN, xNN):
+    #                 reachables.append((yNN, xNN))
+    #                 reachables = list(set().union(reachables, self.get_reachables_jump(yNN, xNN, board, reachables)))
+    #
+    #     return reachables
 
-        return reachables
+    def get_reachables_jump(self, y, x, board):
+        reachables = [(y,x)]
+        start_index = 0
+        while True:
+            end_index = len(reachables)
+            for i in range(start_index, end_index):
+                (y, x) = reachables[i]
+                jump_list = self.get_jumps(y, x, board)
+                for j in range(len(jump_list)):
+                    (y_nn, x_nn) = jump_list[j]
+                    if (y_nn, x_nn) not in reachables:
+                        reachables.append((y_nn, x_nn))
+
+            if start_index == end_index:
+                del reachables[0]
+                return reachables
+            start_index = end_index
 
     def right_zone(self, y_start, x_start, y_end, x_end):
         # if START[y_start, x_start] != 1 and START[y_end, x_end] == 1:
@@ -158,10 +218,7 @@ class Board():
             return False
         return True
 
-
     def move(self, y_start, x_start, y_end, x_end, board, player):
-        if board[y_start, x_start] == EMPTY:
-            print("DEBUG")
         board[y_start, x_start] = EMPTY
         board[y_end, x_end] = player
         return board
@@ -224,7 +281,7 @@ class Board():
         for i in range(len(player_y_list)):
             y_start, x_start = (player_y_list[i], player_x_list[i])
             reachables_direct = self.get_reachables_direct(y_start, x_start, board)
-            reachables_jumping = self.get_reachables_jump(y_start, x_start, board, [])
+            reachables_jumping = self.get_reachables_jump(y_start, x_start, board)
             for (_, _, dir) in reachables_direct:
                 legal_moves_direct.append((y_start, x_start, dir))
 
@@ -312,9 +369,9 @@ class Board():
             rotation_index_board = ROTATION_RIGHT
         else:
             rotation_index_board = ROTATION_LEFT
-        rotated_board = np.copy(START.reshape(13 * 13))
+        rotated_board = np.copy(EMPTY_BOARD.reshape(13 * 13))
         for i in range(len(rotation_board)):
-            if rotation_board[i] != OUT:
+            if rotation_board[i] not in [OUT, EMPTY]:
                 rotated_board[rotation_index_board[i]] = rotation_board[i]
 
         return rotated_board

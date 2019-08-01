@@ -27,6 +27,9 @@ class NNetWrapper:
         x = self.res_block(x, self.num_channels)
         x = self.res_block(x, self.num_channels)
         x = self.res_block(x, self.num_channels)
+        x = self.res_block(x, self.num_channels)
+        x = self.res_block(x, self.num_channels)
+        x = self.res_block(x, self.num_channels)
 
         x = keras.layers.Reshape((self.board_y*self.board_x*self.num_channels,))(x)
 

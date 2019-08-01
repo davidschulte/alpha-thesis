@@ -36,7 +36,6 @@ class Coach():
     """
     def __init__(self, game, nnet, args):
         self.game = game
-        self.board = self.game.getInitBoard()
         self.nnet = nnet
         self.pnet = self.nnet.__class__(self.game)  # the competitor network
         self.args = args
@@ -56,18 +55,64 @@ class Coach():
 
         self.greedy_actor = VeryGreedyActor(game)
 
+    def execute_greedy_episode(self):
+        """
+        This function executes one episode of self-play, starting with player 1.
+        As the game is played, each turn is added as a training example to
+        trainExamples. The game is played till the game ends. After the game
+        ends, the outcome of the game is used to assign values to each example
+        in trainExamples.
+
+        It uses a temp=1 if episodeStep < tempThreshold, and thereafter
+        uses temp=0.
+
+        Returns:
+            trainExamples: a list of examples of the form (canonicalBoard,pi,v)
+                           pi is the MCTS informed policy vector, v is +1 if
+                           the player eventually won the game, else -1.
+        """
+        trainExamples = []
+        board = self.game.getInitBoard()
+        curPlayer = 1
+        episodeStep = 0
+        scores = [0, 0, 0]
+        self.game.reset_board()
+        self.mcts.Visited = []
+
+        while np.count_nonzero(scores) < 2 and episodeStep < self.args.max_steps:
+            s = self.game.stringRepresentation(board)
+            self.mcts.Visited.append(s)
+
+            if scores[curPlayer - 1] == 0:
+                episodeStep += 1
+                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
+                pi = self.greedy_actor.getActionProb(canonicalBoard, episodeStep < 10)
+                trainExamples.append([canonicalBoard, curPlayer, pi, None])
+                action = np.random.choice(len(pi), p=pi)
+            else:
+                action = self.game.getActionSize() - 1
+
+            board, curPlayer = self.game.getNextState(board, curPlayer, action)
+
+            scores = self.game.getGameEnded(board, False)
+
+        scores_player_two = np.array([scores[1], scores[2], scores[0]])
+        scores_player_three = np.array([scores[2], scores[0], scores[1]])
+        scores_all = [scores, scores_player_two, scores_player_three]
+        return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
+
     def execute_episodes(self):
-        it = 1
+        matches_over = 0
         while False in self.all_done:
-            print(it)
-            # if it == 1:
-            #     requests = self.get_first_requests()
-            # else:
-            #     requests = self.get_requests()
             requests = self.get_requests()
 
             update_indices = []
             valid_requests = []
+
+            matches_over_new = 50 - len(update_indices)
+            if matches_over_new > matches_over:
+                print(str(matches_over) + " games decided!")
+                matches_over = matches_over_new
             for i in range(self.args.parallel_block):
                 if requests[i] is not None:
                     update_indices.append(i)
@@ -75,10 +120,8 @@ class Coach():
 
             pis, vs = self.nnet.predict_parallel(valid_requests)
             self.update_predictions(pis, vs, update_indices)
-            it += 1
 
         return self.compile_train_examples()
-
 
     def get_requests(self):
         all_request_states = [None] * self.args.parallel_block
@@ -116,13 +159,6 @@ class Coach():
                 all_request_states[n] = request_state
 
         return all_request_states
-
-    # def get_first_requests(self):
-    #     all_request_states = [None] * self.args.parallel_block
-    #     for n in range(self.args.parallel_block):
-    #         mcts = self.mctss[n]
-    #         all_request_states[n] = mcts.get_next_leaf(self.all_boards[n], self.all_cur_players[n], 0)
-    #     return all_request_states
 
     def update_predictions(self, pis, vs, update_indices):
         for i in range(len(update_indices)):
@@ -236,21 +272,23 @@ class Coach():
             # bookkeeping
             print('------ITER ' + str(i) + '------')
             # examples of the iteration
+            greedy = i == 1 and not self.args.load_model
+
             if not self.skipFirstSelfPlay or i>1:
-                if i == 2 and not self.skipFirstSelfPlay:
-                    iterationTrainExamples = []
-                else:
-                    iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
+                iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 num_eps = self.args.numEps
-                # if i == 1 and not self.args.load_model:
-                #     num_eps = 1000
+                if greedy:
+                    num_eps = self.args.greedy_eps
                 eps_time = AverageMeter()
                 bar = Bar('Self Play', max=num_eps)
                 end = time.time()
 
                 for eps in range(num_eps):
-                    iterationTrainExamples += self.execute_episodes()
+                    if greedy:
+                        iterationTrainExamples += self.execute_greedy_episode()
+                    else:
+                        iterationTrainExamples += self.execute_episodes()
 
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
@@ -270,7 +308,7 @@ class Coach():
             # NB! the examples were collected using the model from the previous iteration, so (i-1)  
             self.saveTrainExamples(i)
             
-            # shuffle examlpes before training
+            # shuffle examples before training
             trainExamples = []
             for e in self.trainExamplesHistory:
                 trainExamples.extend(e)
@@ -279,29 +317,12 @@ class Coach():
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
-            pmcts = MCTS(self.game, self.pnet, self.args)
-            
+
             self.nnet.train(trainExamples)
-            nmcts = MCTS(self.game, self.nnet, self.args)
 
             print('PITTING AGAINST PREVIOUS VERSION')
-            # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
-            #               lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), self.game)
-            # arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
-            #               lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)), self.game, self.args)
-
             arena = Arena(self.pnet, self.nnet, self.game, self.args)
-
             scores = arena.playGames(self.args.arenaCompare)
-
-            # print('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            # if pwins+nwins == 0 or float(nwins)/(pwins+nwins) < self.args.updateThreshold:
-            #     print('REJECTING NEW MODEL')
-            #     self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
-            # else:
-            #     print('ACCEPTING NEW MODEL')
-            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-            #     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
 
             if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
                 print('REJECTING NEW MODEL')

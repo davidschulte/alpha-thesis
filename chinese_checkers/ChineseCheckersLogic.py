@@ -160,7 +160,6 @@ class Board():
             return False
         return True
 
-
     def move(self, y_start, x_start, y_end, x_end, board, player):
         board[y_start, x_start] = EMPTY
         board[y_end, x_end] = player
