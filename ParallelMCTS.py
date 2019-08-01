@@ -37,14 +37,15 @@ class MCTS():
         self.Nsa = {}  # stores #times edge s,a was visited
         self.Ns = {}  # stores #times board s was visited
         self.Ps = {}  # stores initial policy (returned by neural net)
-        # self.C = {}
-        self.Loop = {}
+        self.Loop = []
+        self.Loop_Scout = []
         self.Visited = []
-        # self.start_player = 0
-        # self.max_depth = 0
-
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
+        self.iter = 0
+        self.counts = [0]*game.getActionSize()
+        self.prediction_pi = None
+        self.prediction_v = None
 
     def getActionProb(self, board, player, temp=1):
         """
@@ -57,31 +58,11 @@ class MCTS():
         """
         self.reset()
 
-        self.start_player = player
-        self.max_depth = 0
-
         s = self.game.stringRepresentation(board)
 
         for i in range(self.args.numMCTSSims):
-            # counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in
-            #           range(self.game.getActionSize())]
-            # test = sum(counts)
-            # nonzeros = np.count_nonzero(counts)
-            # if nonzeros < 3 and i == self.args.numMCTSSims - 2:
-            #     print("DEBUG")
-
             self.search(board, player, 0)
 
-        # print(nonzeros)
-        counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-        # test = sum(counts)
-        # if np.count_nonzero(np.array(counts)) < 3:
-        #     print("DEBUG")
-        # valids = np.array(self.game.getValidMoves(self.game.getCanonicalForm(board, player),1))
-        #
-        # ways = np.array(counts)
-        # print(ways[np.nonzero(valids)])
-        # print(self.max_depth)
         if temp == 0:
             bestA = np.argmax(counts)
             probs = [0] * len(counts)
@@ -89,14 +70,12 @@ class MCTS():
             return probs
 
         sum_counts = sum(counts)
-        # counts = [x**(1./temp) for x in counts]
         if sum_counts == 0:
             print(board)
             print("Random Move by " + str(player) + "!")
             counts = self.game.getValidMoves(board, player)
 
         probs = [x / float(sum_counts) for x in counts]
-        # test = sum(probs)
         return probs
 
     def search(self, board, player, depth):
@@ -127,14 +106,6 @@ class MCTS():
 
         canonicalBoard = self.game.getCanonicalForm(board, player)
 
-        # if s in self.C and scores[0] == 0:
-        #     if self.C[s] >= 3:
-        #         scores[scores == 0] = 1
-        #         scores[2] = 0
-        #         print("LOOP")
-        #         print(canonicalBoard)
-        #         return np.array([scores[2], scores[0], scores[1]])
-
         if s not in self.Es:
             self.Es[s] = np.copy(scores)
         if np.count_nonzero(self.Es[s]) == 2:
@@ -162,8 +133,9 @@ class MCTS():
 
                 print("CUT LEAF")
             # leaf node
-            self.Ps[(s, player)], scores_nn = self.nnet.predict(canonicalBoard, player)
-            valids = self.game.getValidMoves(canonicalBoard, 1)
+            valids = self.Vs[(s, player)]
+
+            self.Ps[(s, player)], scores_nn = self.prediction_pi, self.prediction_v
             self.Ps[(s, player)] = self.Ps[(s, player)] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[(s, player)])
             if sum_Ps_s > 0:
@@ -177,7 +149,6 @@ class MCTS():
                 self.Ps[(s, player)] = self.Ps[(s, player)] + valids
                 self.Ps[(s, player)] /= np.sum(self.Ps[(s, player)])
 
-            self.Vs[(s, player)] = valids
             self.Ns[(s, player)] = 0
 
             for i in range(3):
@@ -242,6 +213,78 @@ class MCTS():
 
         return scores
 
+
+    def get_next_leaf(self, board, player, depth):
+        s = self.game.stringRepresentation(board)
+
+        scores = self.game.getGameEnded(board, True).astype('float16')
+
+        canonicalBoard = self.game.getCanonicalForm(board, player)
+
+        if s not in self.Es:
+            self.Es[s] = np.copy(scores)
+        if np.count_nonzero(self.Es[s]) == 2:
+            # terminal node
+            return None
+
+        if depth == 0:
+            self.Loop_Scout = [(s, player)]
+        else:
+            if s in self.Visited:
+                return None
+            if (s, player) in self.Loop_Scout:
+                return None
+            else:
+                self.Loop.append((s, player))
+
+        if (s, player) not in self.Ps:
+            valids = self.game.getValidMoves(canonicalBoard, 1)
+            self.Vs[(s, player)] = valids
+
+            return canonicalBoard
+            # self.Ps[(s, player)], scores_nn = self.nnet.predict(canonicalBoard, player)
+            # return scores
+
+        valids = self.Vs[(s, player)]
+        cur_best = -float('inf')
+        best_act = -1
+
+        # pick the action with the highest upper confidence bound
+        for a in range(self.game.getActionSize()):
+            if valids[a]:
+                if (s, a, player) in self.Qsa:
+                    # qsa = self.Qsa[(s, a, player)]
+                    # pssa = self.Ps[(s, player)][a]
+                    # ns = self.Ns[(s, player)]
+                    # nsa = self.Nsa[(s, a, player)]
+                    # exploitation = self.Qsa[(s, a, player)]
+                    # exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (1 + self.Nsa[(s, a, player)])
+                    u = self.Qsa[(s, a, player)] + self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (
+                                1 + self.Nsa[(s, a, player)])
+                    # u = u
+                else:
+                    # pssa = self.Ps[(s, player)][a]
+                    # nsa = self.Ns[(s, player)]
+                    # exploitation = 0
+                    # exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)
+                    u = self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)  # Q = 0 ?
+                    # u = u
+
+                if u > cur_best:
+                    # if exploitation > 0:
+                    #     expl = True
+                    # else:
+                    #     expl = False
+                    cur_best = u
+                    best_act = a
+
+        a = best_act
+        next_s, next_player = self.game.getNextState(board, player, a)
+
+        state = self.get_next_leaf(next_s, next_player, depth + 1)
+
+        return state
+
     def reset(self):
         self.Qsa = {}  # stores Q values for s,a (as defined in the paper)
         self.Nsa = {}  # stores #times edge s,a was visited
@@ -250,4 +293,29 @@ class MCTS():
 
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
-        self.C = {}
+        self.iter = 0
+
+    def get_counts(self, board, player):
+        if self.iter < self.args.numMCTSSims:
+            return None
+        s = self.game.stringRepresentation(board)
+        counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+        sum_counts = sum(counts)
+        if sum_counts == 0:
+            print("SUM COUNTS 0!")
+            canonical_board = self.game.getCanonicalForm(board, player)
+            counts = self.game.getValidMoves(canonical_board, 1)
+            sum_counts = sum(counts)
+
+        probs = [x / float(sum_counts) for x in counts]
+        return probs
+
+    def add_iter(self):
+        self.iter += 1
+
+    def get_done(self):
+        return self.iter == self.args.numMCTSSims
+
+    def update_predictions(self, pi, v):
+        self.prediction_pi = pi
+        self.prediction_v = v

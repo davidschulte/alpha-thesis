@@ -64,18 +64,18 @@ class NNetWrapper:
         boards, pis, vs = list(zip(*examples))
         self.model.fit(np.array(boards), [np.array(pis), np.array(vs)], epochs=self.epochs, batch_size=self.batch_size)
 
-    def predict(self, board, player):
+    def predict(self, board):
         board = board[np.newaxis, :, :]
         board = board.astype('float32')
         [pi, v] = self.model.predict(board)
         pi = np.reshape(pi, (self.action_size,))
         v = np.reshape(v, (3,))
-        if player == 2:
-            v = np.array([v[2], v[0], v[1]])
-        elif player == 3:
-            v = np.array([v[1], v[2], v[0]])
-
         return pi, v
+
+    def predict_parallel(self, boards):
+        input = tf.convert_to_tensor(boards, np.float32)
+        return self.model.predict(input)
+
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)

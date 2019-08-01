@@ -1,8 +1,8 @@
 #!/opt/python/python-3.6/i/bin/python
 
-from Coach import Coach
+from ParallelCoach import Coach
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
-from chinese_checkers.tensorflow.ResNet import NNetWrapper as nn
+from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from utils import *
 import numpy as np
 import sys
@@ -16,9 +16,10 @@ args = dotdict({
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 50,
+    'numMCTSSims': 10,
     'arenaCompare': 6,
-    'cpuct': 8,
+    'cpuct': 50,
+    'parallel_block': 200,
 
     'checkpoint': 'checkpoint',
     'load_model': False,
@@ -35,8 +36,9 @@ if __name__=="__main__":
         nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
     c = Coach(g, nnet, args)
+
     # c = Coach(g, args)
-    if args.load_model:
-        print("Load trainExamples from file")
-        c.loadTrainExamples()
+    # if args.load_model:
+    #     print("Load trainExamples from file")
+    #     c.loadTrainExamples()
     c.learn()
