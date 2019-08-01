@@ -19,7 +19,7 @@ args = dotdict({
     'numMCTSSims': 10,
     'arenaCompare': 6,
     'cpuct': 50,
-    'parallel_block': 500,
+    'parallel_block': 1000,
 
     'checkpoint': 'checkpoint',
     'load_model': False,
