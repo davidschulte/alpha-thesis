@@ -77,11 +77,9 @@ class Coach():
         episodeStep = 0
         scores = [0, 0, 0]
         self.game.reset_board()
-        self.mcts.Visited = []
 
         while np.count_nonzero(scores) < 2 and episodeStep < self.args.max_steps:
             s = self.game.stringRepresentation(board)
-            self.mcts.Visited.append(s)
 
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
@@ -138,6 +136,8 @@ class Coach():
                     # mcts.search(board, cur_player, 0)
                     # mcts.add_iter()
                     if mcts.get_done():
+                        s = self.game.stringRepresentation(board)
+                        mcts.Visited.append(s)
                         pi = mcts.get_counts(board, cur_player)
                         action = np.random.choice(len(pi), p=pi)
                         board, cur_player = game.getNextState(board, cur_player, action)

@@ -76,8 +76,8 @@ class NNetWrapper:
         return pi, v
 
     def predict_parallel(self, boards):
-        input = tf.convert_to_tensor(boards, np.float32)
-        return self.model.predict(input)
+        boards = tf.convert_to_tensor(boards, np.float32)
+        return self.model.predict(boards)
 
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
