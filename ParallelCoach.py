@@ -125,7 +125,7 @@ class Coach():
                 self.update_predictions(pis, vs, update_indices)
             if it % self.args.numMCTSSims == 0:
                 end_time = time.time()
-                print(str(it/self.args.parallel_block) + "steps: " + str(end_time-start_time) + "s")
+                print(str(int(it/self.args.numMCTSSims)) + "steps: " + str(end_time-start_time) + "s")
                 start_time = end_time
             it += 1
             # self.one_iter()
