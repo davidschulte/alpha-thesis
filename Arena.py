@@ -68,7 +68,7 @@ class Arena():
 
         scores = np.array([0, 0, 0])
         self.game.reset_board()
-        while np.count_nonzero(scores) < 2 and it < 1000:
+        while np.count_nonzero(scores) < 2 and it < self.args.max_steps:
 
             if it % 100 == 0:
                 print(it)

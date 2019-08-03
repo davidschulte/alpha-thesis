@@ -117,15 +117,15 @@ class Coach():
 
             matches_over_new = self.args.parallel_block - len(update_indices)
             if matches_over_new > matches_over:
-                print(str(matches_over) + " games decided!")
                 matches_over = matches_over_new
+                print(str(matches_over) + " games decided!")
 
             if len(update_indices) > 0:
                 pis, vs = self.nnet.predict_parallel(valid_requests)
                 self.update_predictions(pis, vs, update_indices)
             if it % self.args.numMCTSSims == 0:
                 end_time = time.time()
-                print(str(int(it/self.args.numMCTSSims)) + "steps: " + str(end_time-start_time) + "s")
+                print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
                 start_time = end_time
             it += 1
             # self.one_iter()
@@ -154,7 +154,6 @@ class Coach():
                 request_state = None
                 scores = self.all_scores[n]
                 while not self.all_done[n] and request_state is None:
-                    episode_step = self.all_episode_steps[n]
                     game = self.games[n]
                     mcts = self.mctss[n]
                     board = self.all_boards[n]
@@ -165,11 +164,13 @@ class Coach():
                         s = self.game.stringRepresentation(board)
                         mcts.Visited.append(s)
                         pi = mcts.get_counts(board, cur_player)
+                        canonical_board = self.game.getCanonicalForm(board, cur_player)
+                        self.all_train_examples[n].append([canonical_board, cur_player, pi, None])
                         action = np.random.choice(len(pi), p=pi)
                         board, cur_player = game.getNextState(board, cur_player, action)
                         scores = game.getGameEnded(board, False)
                         self.all_episode_steps[n] += 1
-                        if self.all_episode_steps[n] > 600 or np.count_nonzero(scores) == 2:
+                        if self.all_episode_steps[n] > self.args.max_steps or np.count_nonzero(scores) == 2:
                             self.all_done[n] = True
                         else:
                             if scores[cur_player-1] != 0:
@@ -179,7 +180,6 @@ class Coach():
                         request_state = mcts.search(board, cur_player, 0)
 
                 self.all_boards[n] = board
-                self.all_episode_steps[n] = episode_step
                 self.all_scores[n] = scores
                 self.all_cur_players[n] = cur_player
                 all_request_states[n] = request_state
