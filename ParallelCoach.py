@@ -170,7 +170,7 @@ class Coach():
                         board, cur_player = game.getNextState(board, cur_player, action)
                         scores = game.getGameEnded(board, False)
                         self.all_episode_steps[n] += 1
-                        if self.all_episode_steps[n] > self.args.max_steps or np.count_nonzero(scores) == 2:
+                        if self.all_episode_steps[n] > self.args.max_steps or np.count_nonzero(scores) > 1:
                             self.all_done[n] = True
                         else:
                             if scores[cur_player-1] != 0:
