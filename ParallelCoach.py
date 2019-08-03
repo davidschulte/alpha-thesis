@@ -100,6 +100,9 @@ class Coach():
         return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
 
     def execute_episodes(self):
+        it = 1
+        start_time = time.time()
+
         matches_over = 0
         while False in self.all_done:
             requests = self.get_requests()
@@ -107,19 +110,42 @@ class Coach():
             update_indices = []
             valid_requests = []
 
-            matches_over_new = 50 - len(update_indices)
-            if matches_over_new > matches_over:
-                print(str(matches_over) + " games decided!")
-                matches_over = matches_over_new
             for i in range(self.args.parallel_block):
                 if requests[i] is not None:
                     update_indices.append(i)
                     valid_requests.append(requests[i])
 
-            pis, vs = self.nnet.predict_parallel(valid_requests)
-            self.update_predictions(pis, vs, update_indices)
+            matches_over_new = self.args.parallel_block - len(update_indices)
+            if matches_over_new > matches_over:
+                print(str(matches_over) + " games decided!")
+                matches_over = matches_over_new
+
+            if len(update_indices) > 0:
+                pis, vs = self.nnet.predict_parallel(valid_requests)
+                self.update_predictions(pis, vs, update_indices)
+            if it % self.args.numMCTSSims == 0:
+                end_time = time.time()
+                print(str(it) + ": " + str(end_time-start_time) + "s")
+                start_time = end_time
+            it += 1
+            # self.one_iter()
 
         return self.compile_train_examples()
+
+    @profile
+    def one_iter(self):
+        requests = self.get_requests()
+
+        update_indices = []
+        valid_requests = []
+
+        for i in range(self.args.parallel_block):
+            if requests[i] is not None:
+                update_indices.append(i)
+                valid_requests.append(requests[i])
+
+        pis, vs = self.nnet.predict_parallel(valid_requests)
+        self.update_predictions(pis, vs, update_indices)
 
     def get_requests(self):
         all_request_states = [None] * self.args.parallel_block

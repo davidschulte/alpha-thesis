@@ -16,7 +16,7 @@ args = dotdict({
     'tempThreshold': 15,
     'updateThreshold': 0.6,
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 100,
+    'numMCTSSims': 5,
     'arenaCompare': 12,
     'cpuct': 50,
     'max_steps': 900,
@@ -24,7 +24,7 @@ args = dotdict({
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
-    'load_model': False,
+    'load_model': True,
     'load_folder_file': ('checkpoint','temp.h5'),
     'numItersForTrainExamplesHistory': 20,
 
