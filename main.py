@@ -20,7 +20,7 @@ args = dotdict({
     'arenaCompare': 12,
     'cpuct': 50,
     'max_steps': 900,
-    'parallel_block': 500,
+    'parallel_block': 50,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
