@@ -316,6 +316,6 @@ class Coach():
                 self.trainExamplesHistory = Unpickler(f).load()
             f.closed
             # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+            # self.skipFirstSelfPlay = True
 
 
