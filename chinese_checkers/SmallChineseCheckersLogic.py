@@ -348,14 +348,19 @@ class Board():
         return grid_no, index_list[0]
 
     def rotate_board(self, rotation_board, start_player, end_player):
-        rotation_board = rotation_board.reshape(13 * 13)
+        rot = rotation_board.reshape(13 * 13)
 
         if self.get_next_player(start_player) == end_player:
             right = False
         else:
             right = True
 
-        rotation_board = self.rotate(rotation_board, right)
+        alternative_rotation_board = self.alternative_rotate(rotation_board, right)
+        rotation_board = self.rotate(rot, right)
+        test = rotation_board.reshape(13, 13)
+
+        if not np.array_equal(test, alternative_rotation_board):
+            print("DEBUG")
 
         return rotation_board.reshape(13, 13)
         # rotated_board = np.copy(board)
@@ -373,5 +378,31 @@ class Board():
         for i in range(len(rotation_board)):
             if rotation_board[i] not in [OUT, EMPTY]:
                 rotated_board[rotation_index_board[i]] = rotation_board[i]
+
+        return rotated_board
+
+    def alternative_rotate(self, rotation_board, right):
+        rotated_board = np.copy(EMPTY_BOARD)
+
+        if right:
+            y_to_y = 0
+            x_to_y = 1
+            y_to_x = -1
+            x_to_x = -1
+        else:
+            y_to_y = -1
+            x_to_y = -1
+            y_to_x = 1
+            x_to_x = 0
+
+        for y in range(13):
+            for x in range(13):
+                player = rotation_board[y,x]
+                if player in [1, 2, 3]:
+                    y_dir = y - 6
+                    x_dir = x - 6
+                    new_y = 6 + y_to_y * y_dir + x_to_y * x_dir
+                    new_x = 6 + y_to_x * y_dir + x_to_x * x_dir
+                    rotated_board[new_y, new_x] = player
 
         return rotated_board

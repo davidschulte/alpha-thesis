@@ -32,6 +32,7 @@ class ChineseCheckersGame(Game):
         """
         return 81*6+25*25+2*20*20+16*16+1
 
+
     def getNextState(self, board, player, action):
         """
         Input:

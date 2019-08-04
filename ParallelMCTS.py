@@ -53,7 +53,7 @@ class MCTS():
 
             if s not in self.Es:
                 self.Es[s] = np.copy(scores)
-            if np.count_nonzero(self.Es[s]) == 2:
+            if np.count_nonzero(self.Es[s]) > 1:
                 # terminal node
                 self.back_propagate(self.Es[s])
                 return None
