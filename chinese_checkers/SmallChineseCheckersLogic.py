@@ -328,39 +328,79 @@ class Board():
         y_coordinates, x_coordinates = np.where(GRID == grid_no)
         return y_coordinates[encoded], x_coordinates[encoded]
 
+    # def encode_coordinates(self, y, x):
+    #     y_coordinates, x_coordinates = np.where(GRID != 0)
+    #     y_fits = np.where(y_coordinates == y)
+    #     x_fits = np.where(x_coordinates == x)
+    #     index_list = np.intersect1d(y_fits, x_fits)
+    #     if index_list[0] != self.alternative_encode_ccordinates(y, x):
+    #         print("ERROR!")
+    #     return index_list[0]
+
     def encode_coordinates(self, y, x):
-        y_coordinates, x_coordinates = np.where(GRID != 0)
-        y_fits = np.where(y_coordinates == y)
-        x_fits = np.where(x_coordinates == x)
-        index_list = np.intersect1d(y_fits, x_fits)
-        if len(index_list) == 0:
-            print("ERROR: y = " + str(y) + " x = " + str(x))
-        return index_list[0]
+        if y < 7:
+            g_base = y**2 + y
+            g_plus = y + x - 8
+        else:
+            g_base = -y**2 / 2 + 27 / 2 *y - 42
+            g_plus = x - 2
+
+        return int(g_base + g_plus - 1)
+
+    # def encode_coordinates_grid(self, y, x):
+    #     grid_no = GRID[y, x]
+    #     y_coordinates, x_coordinates = np.where(GRID == grid_no)
+    #     y_fits = np.where(y_coordinates == y)
+    #     x_fits = np.where(x_coordinates == x)
+    #     index_list = np.intersect1d(y_fits, x_fits)
+    #     alt_grid_no, g = self.alternative_encode_coordinates_grid(y, x)
+    #     if grid_no != alt_grid_no or index_list[0] != g:
+    #         print("ERROR")
+    #     return grid_no, index_list[0]
 
     def encode_coordinates_grid(self, y, x):
-        grid_no = GRID[y, x]
-        y_coordinates, x_coordinates = np.where(GRID == grid_no)
-        y_fits = np.where(y_coordinates == y)
-        x_fits = np.where(x_coordinates == x)
-        index_list = np.intersect1d(y_fits, x_fits)
-        if len(index_list) == 0:
-            print("ERROR: y = " + str(y) + " x = " + str(x))
-        return grid_no, index_list[0]
+        grid_no = GRID[y,x]
+
+        if grid_no == 1:
+            if y < 7:
+                g_base = y * (y + 2 ) / 8
+                g_plus = (x + y + 1) / 2 + 4
+            else:
+                g_base = 16 - (14 - y) * (16 - y) / 8
+                g_plus = (x + 1) / 2 - 1
+        elif grid_no == 2:
+            if y < 7:
+                g_base = (y - 1) * (y + 1) / 8
+                g_plus = (x + y + 1) / 2 - 4
+            else:
+                g_base = 12 - (13 - y) * (15 - y) / 8
+                g_plus = x / 2 - 1
+        elif grid_no == 3:
+            if y < 7:
+                g_base = (y - 1) * (y + 1) / 8
+                g_plus = (x + y) / 2 - 4
+            else:
+                g_base = 12 - (13 - y) * (15 - y) / 8
+                g_plus = (x - 1) / 2
+        else:
+            if y < 7:
+                g_base = (y - 2) * y / 8
+                g_plus = (x + y) / 2 - 4
+            else:
+                g_base = 9 - (12 - y) * (14 - y) / 8
+                g_plus = x / 2 - 1
+
+        return grid_no, int(g_base + g_plus - 1)
 
     def rotate_board(self, rotation_board, start_player, end_player):
-        rot = rotation_board.reshape(13 * 13)
+        rotation_board = rotation_board.reshape(13 * 13)
 
         if self.get_next_player(start_player) == end_player:
             right = False
         else:
             right = True
 
-        alternative_rotation_board = self.alternative_rotate(rotation_board, right)
-        rotation_board = self.rotate(rot, right)
-        test = rotation_board.reshape(13, 13)
-
-        if not np.array_equal(test, alternative_rotation_board):
-            print("DEBUG")
+        rotation_board = self.rotate(rotation_board, right)
 
         return rotation_board.reshape(13, 13)
         # rotated_board = np.copy(board)
@@ -381,28 +421,28 @@ class Board():
 
         return rotated_board
 
-    def alternative_rotate(self, rotation_board, right):
-        rotated_board = np.copy(EMPTY_BOARD)
-
-        if right:
-            y_to_y = 0
-            x_to_y = 1
-            y_to_x = -1
-            x_to_x = -1
-        else:
-            y_to_y = -1
-            x_to_y = -1
-            y_to_x = 1
-            x_to_x = 0
-
-        for y in range(13):
-            for x in range(13):
-                player = rotation_board[y,x]
-                if player in [1, 2, 3]:
-                    y_dir = y - 6
-                    x_dir = x - 6
-                    new_y = 6 + y_to_y * y_dir + x_to_y * x_dir
-                    new_x = 6 + y_to_x * y_dir + x_to_x * x_dir
-                    rotated_board[new_y, new_x] = player
-
-        return rotated_board
+    # def alternative_rotate(self, rotation_board, right):
+    #     rotated_board = np.copy(EMPTY_BOARD)
+    #
+    #     if right:
+    #         y_to_y = 0
+    #         x_to_y = 1
+    #         y_to_x = -1
+    #         x_to_x = -1
+    #     else:
+    #         y_to_y = -1
+    #         x_to_y = -1
+    #         y_to_x = 1
+    #         x_to_x = 0
+    #
+    #     for y in range(13):
+    #         for x in range(13):
+    #             player = rotation_board[y,x]
+    #             if player in [1, 2, 3]:
+    #                 y_dir = y - 6
+    #                 x_dir = x - 6
+    #                 new_y = 6 + y_to_y * y_dir + x_to_y * x_dir
+    #                 new_x = 6 + y_to_x * y_dir + x_to_x * x_dir
+    #                 rotated_board[new_y, new_x] = player
+    #
+    #     return rotated_board

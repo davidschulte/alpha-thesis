@@ -225,8 +225,11 @@ class Coach():
         It then pits the new neural network against the old one and accepts it
         only if it wins >= updateThreshold fraction of games.
         """
-
-        for i in range(1, self.args.numIters+1):
+        if self.args.load_model:
+            start = self.args.load_folder_file[1] + 1
+        else:
+            start = 1
+        for i in range(start, self.args.numIters+1):
             # bookkeeping
             print('------ITER ' + str(i) + '------')
             # examples of the iteration
@@ -303,7 +306,8 @@ class Coach():
         f.closed
 
     def loadTrainExamples(self):
-        modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
+        file_name = "checkpoint_" + str(self.args.load_folder_file[1]) + ".h5"
+        modelFile = os.path.join(self.args.load_folder_file[0], file_name)
         examplesFile = modelFile+".examples"
         if not os.path.isfile(examplesFile):
             print(examplesFile)

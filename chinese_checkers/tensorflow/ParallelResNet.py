@@ -95,3 +95,10 @@ class NNetWrapper:
         # if not os.path.exists(filepath+'.meta'):
         #     raise("No model in path {}".format(filepath))
         self.model = keras.models.load_model(filepath)
+
+    def load_first_checkpoint(self, folder, iteration):
+        filename = "checkpoint_" + str(iteration) + ".h5"
+        filepath = os.path.join(folder, filename)
+        # if not os.path.exists(filepath+'.meta'):
+        #     raise("No model in path {}".format(filepath))
+        self.model = keras.models.load_model(filepath)
