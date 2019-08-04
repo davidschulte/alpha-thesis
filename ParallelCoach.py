@@ -44,6 +44,18 @@ class Coach():
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
         self.curPlayer = 1
 
+        self.all_train_examples = None
+        self.all_boards = None
+        self.all_episode_steps = None
+        self.all_scores = None
+        self.all_cur_players = None
+        self.all_done = None
+        self.games = None
+        self.mctss = None
+
+        self.greedy_actor = VeryGreedyActor(game)
+
+    def initialize_parallel(self):
         self.all_train_examples = [[] for _ in range(self.args.parallel_block)]
         self.all_boards = [self.game.getInitBoard()] * self.args.parallel_block
         self.all_episode_steps = [0] * self.args.parallel_block
@@ -53,7 +65,6 @@ class Coach():
         self.games = [ChineseCheckersGame() for _ in range(self.args.parallel_block)]
         self.mctss = [MCTS(self.games[i], self.nnet, self.args) for i in range(self.args.parallel_block)]
 
-        self.greedy_actor = VeryGreedyActor(game)
 
     def execute_greedy_episode(self):
         """
@@ -100,6 +111,7 @@ class Coach():
         return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
 
     def execute_episodes(self):
+        self.initialize_parallel()
         it = 1
         start_time = time.time()
 
