@@ -159,7 +159,6 @@ class Coach():
         pis, vs = self.nnet.predict_parallel(valid_requests)
         self.update_predictions(pis, vs, update_indices)
 
-    @profile
     def get_requests(self):
         all_request_states = [None] * self.args.parallel_block
         for n in range(self.args.parallel_block):
