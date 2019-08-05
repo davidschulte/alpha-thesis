@@ -38,7 +38,6 @@ class MCTS():
         self.Ns = {}  # stores #times board s was visited
         self.Ps = {}  # stores initial policy (returned by neural net)
         self.Loop = []
-        self.Loop_Scout = []
         self.Visited = []
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
@@ -59,16 +58,16 @@ class MCTS():
                 return None
 
             if depth == 0:
-                self.Loop_Scout = [(s, player)]
+                self.Loop = [(s, player)]
             else:
                 if s in self.Visited:
                     self.back_propagate(self.Es[s])
                     return None
-                if (s, player) in self.Loop_Scout:
+                if (s, player) in self.Loop:
                     self.back_propagate(self.Es[s])
                     return None
                 else:
-                    self.Loop_Scout.append((s, player))
+                    self.Loop.append((s, player))
 
             if (s, player) not in self.Ps:
                 canonicalBoard = self.game.getCanonicalForm(board, player)
