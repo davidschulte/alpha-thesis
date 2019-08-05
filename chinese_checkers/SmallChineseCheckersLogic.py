@@ -333,16 +333,16 @@ class Board():
     #     y_fits = np.where(y_coordinates == y)
     #     x_fits = np.where(x_coordinates == x)
     #     index_list = np.intersect1d(y_fits, x_fits)
-    #     if index_list[0] != self.alternative_encode_ccordinates(y, x):
+    #     if index_list[0] != self.alternative_encode_coordinates(y, x):
     #         print("ERROR!")
     #     return index_list[0]
 
     def encode_coordinates(self, y, x):
         if y < 7:
-            g_base = y**2 + y
+            g_base = (y**2 + y) / 2
             g_plus = y + x - 8
         else:
-            g_base = -y**2 / 2 + 27 / 2 *y - 42
+            g_base = 49 - (13 - y) * (14 - y ) / 2
             g_plus = x - 2
 
         return int(g_base + g_plus - 1)
@@ -364,7 +364,7 @@ class Board():
         if grid_no == 1:
             if y < 7:
                 g_base = y * (y + 2 ) / 8
-                g_plus = (x + y + 1) / 2 + 4
+                g_plus = (x + y + 1) / 2 - 4
             else:
                 g_base = 16 - (14 - y) * (16 - y) / 8
                 g_plus = (x + 1) / 2 - 1
