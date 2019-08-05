@@ -68,7 +68,7 @@ class MCTS():
                     self.back_propagate(self.Es[s])
                     return None
                 else:
-                    self.Loop.append((s, player))
+                    self.Loop_Scout.append((s, player))
 
             if (s, player) not in self.Ps:
                 canonicalBoard = self.game.getCanonicalForm(board, player)
