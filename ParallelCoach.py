@@ -104,11 +104,11 @@ class Coach():
 
             scores = self.game.getGameEnded(board, False)
 
-            if episodeStep % 100 == 0:
-                print(episodeStep)
-                print(board)
-
-        print(board)
+        #     if episodeStep % 100 == 0:
+        #         print(episodeStep)
+        #         print(board)
+        #
+        # print(board)
         scores_player_two = np.array([scores[1], scores[2], scores[0]])
         scores_player_three = np.array([scores[2], scores[0], scores[1]])
         scores_all = [scores, scores_player_two, scores_player_three]
