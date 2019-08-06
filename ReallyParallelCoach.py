@@ -10,6 +10,7 @@ import time
 import cProfile, pstats, io
 from chinese_checkers.VeryGreedyActor import VeryGreedyActor
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame
+import joblib
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -52,6 +53,7 @@ class Coach():
         self.all_done = None
         self.games = None
         self.mctss = None
+        self.all_requests = None
 
         self.greedy_actor = VeryGreedyActor(game)
 
@@ -90,6 +92,7 @@ class Coach():
         self.game.reset_board()
 
         while np.count_nonzero(scores) < 2 and episodeStep < self.args.max_steps:
+            s = self.game.stringRepresentation(board)
 
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
@@ -104,11 +107,6 @@ class Coach():
 
             scores = self.game.getGameEnded(board, False)
 
-            if episodeStep % 100 == 0:
-                print(episodeStep)
-                print(board)
-
-        print(board)
         scores_player_two = np.array([scores[1], scores[2], scores[0]])
         scores_player_three = np.array([scores[2], scores[0], scores[1]])
         scores_all = [scores, scores_player_two, scores_player_three]
@@ -164,43 +162,45 @@ class Coach():
         self.update_predictions(pis, vs, update_indices)
 
     def get_requests(self):
-        all_request_states = [None] * self.args.parallel_block
-        for n in range(self.args.parallel_block):
-            if not self.all_done[n]:
-                request_state = None
-                scores = self.all_scores[n]
-                while not self.all_done[n] and request_state is None:
-                    game = self.games[n]
-                    mcts = self.mctss[n]
-                    board = self.all_boards[n]
-                    cur_player = self.all_cur_players[n]
-                    # mcts.search(board, cur_player, 0)
-                    # mcts.add_iter()
-                    if mcts.get_done():
-                        s = self.game.stringRepresentation(board)
-                        mcts.Visited.append(s)
-                        pi = mcts.get_counts(board, cur_player)
-                        canonical_board = self.game.getCanonicalForm(board, cur_player)
-                        self.all_train_examples[n].append([canonical_board, cur_player, pi, None])
-                        action = np.random.choice(len(pi), p=pi)
-                        board, cur_player = game.getNextState(board, cur_player, action)
-                        scores = game.getGameEnded(board, False)
-                        self.all_episode_steps[n] += 1
-                        if self.all_episode_steps[n] > self.args.max_steps or np.count_nonzero(scores) > 1:
-                            self.all_done[n] = True
-                        else:
-                            if scores[cur_player-1] != 0:
-                                action = game.getActionSize()-1
-                                _, cur_player = game.getNextState(board, cur_player, action)
-                    if not self.all_done[n]:
-                        request_state = mcts.search(board, cur_player, 0)
+        self.all_requests = [None] * self.args.parallel_block
+        joblib.Parallel(n_jobs=2)(joblib.delayed(self.one_request)(i) for i in range(self.args.parallel_block))
 
-                self.all_boards[n] = board
-                self.all_scores[n] = scores
-                self.all_cur_players[n] = cur_player
-                all_request_states[n] = request_state
+        return self.all_requests
 
-        return all_request_states
+    def one_request(self, n):
+        if not self.all_done[n]:
+            request_state = None
+            scores = self.all_scores[n]
+            while not self.all_done[n] and request_state is None:
+                game = self.games[n]
+                mcts = self.mctss[n]
+                board = self.all_boards[n]
+                cur_player = self.all_cur_players[n]
+                # mcts.search(board, cur_player, 0)
+                # mcts.add_iter()
+                if mcts.get_done():
+                    s = self.game.stringRepresentation(board)
+                    mcts.Visited.append(s)
+                    pi = mcts.get_counts(board, cur_player)
+                    canonical_board = self.game.getCanonicalForm(board, cur_player)
+                    self.all_train_examples[n].append([canonical_board, cur_player, pi, None])
+                    action = np.random.choice(len(pi), p=pi)
+                    board, cur_player = game.getNextState(board, cur_player, action)
+                    scores = game.getGameEnded(board, False)
+                    self.all_episode_steps[n] += 1
+                    if self.all_episode_steps[n] > self.args.max_steps or np.count_nonzero(scores) > 1:
+                        self.all_done[n] = True
+                    else:
+                        if scores[cur_player - 1] != 0:
+                            action = game.getActionSize() - 1
+                            _, cur_player = game.getNextState(board, cur_player, action)
+                if not self.all_done[n]:
+                    request_state = mcts.search(board, cur_player, 0)
+
+            self.all_boards[n] = board
+            self.all_scores[n] = scores
+            self.all_cur_players[n] = cur_player
+            self.all_request_states[n] = request_state
 
     def update_predictions(self, pis, vs, update_indices):
         for i in range(len(update_indices)):
@@ -263,25 +263,21 @@ class Coach():
                     bar.next()
                 bar.finish()
 
-                # save the iteration examples to the history
-                if not greedy:
-                    self.trainExamplesHistory.append(iterationTrainExamples)
+                # save the iteration examples to the history 
+                self.trainExamplesHistory.append(iterationTrainExamples)
                 
-                    if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
-                        print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
-                        self.trainExamplesHistory.pop(0)
-                    # backup history to a file
-                    # NB! the examples were collected using the model from the previous iteration, so (i-1)
-                    self.saveTrainExamples(i)
+            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
+                print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
+                self.trainExamplesHistory.pop(0)
+            # backup history to a file
+            # NB! the examples were collected using the model from the previous iteration, so (i-1)  
+            self.saveTrainExamples(i)
             
-                # shuffle examples before training
-                trainExamples = []
-                for e in self.trainExamplesHistory:
-                    trainExamples.extend(e)
-                shuffle(trainExamples)
-
-            else:
-                trainExamples = iterationTrainExamples
+            # shuffle examples before training
+            trainExamples = []
+            for e in self.trainExamplesHistory:
+                trainExamples.extend(e)
+            shuffle(trainExamples)
 
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
@@ -289,20 +285,17 @@ class Coach():
 
             self.nnet.train(trainExamples)
 
-            if not greedy:
-                print('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(self.pnet, self.nnet, self.game, self.args)
-                scores = arena.playGames(self.args.arenaCompare)
+            print('PITTING AGAINST PREVIOUS VERSION')
+            arena = Arena(self.pnet, self.nnet, self.game, self.args)
+            scores = arena.playGames(self.args.arenaCompare)
 
-                if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
-                    print('REJECTING NEW MODEL')
-                    self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
-                else:
-                    print('ACCEPTING NEW MODEL')
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                    self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
+            if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:
+                print('REJECTING NEW MODEL')
+                self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
             else:
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='checkppoint_1.h5')
+                print('ACCEPTING NEW MODEL')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.h5'

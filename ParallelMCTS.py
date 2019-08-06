@@ -41,6 +41,7 @@ class MCTS():
         self.Visited = []
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
+        self.B = {}
         self.iter = 0
         self.counts = [0]*game.getActionSize()
         self.trace = []
@@ -99,7 +100,13 @@ class MCTS():
             a = best_act
 
             self.trace.append([s, a, player])
-            board, player = self.game.getNextState(board, player, a)
+            if (s, player) in self.B:
+                self.B[(s, player)] = board
+                player = self.game.get_next_player(player)
+            else:
+                board, next_player = self.game.getNextState(board, player, a)
+                self.B[(s, player)] = board
+                player = next_player
             depth += 1
 
 
@@ -116,6 +123,7 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
         self.iter = 0
+        self.B = {}
 
     def get_counts(self, board, player):
         if self.iter < self.args.numMCTSSims:

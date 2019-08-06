@@ -190,3 +190,6 @@ class ChineseCheckersGame(Game):
 
     def get_board(self):
         return self.b
+
+    def get_next_player(self, player):
+        return self.b.get_next_player(player)
