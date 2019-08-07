@@ -123,30 +123,30 @@ class Coach():
 
         matches_over = 0
         while False in self.all_done:
-            # requests = self.get_requests()
-            #
-            # update_indices = []
-            # valid_requests = []
-            #
-            # for i in range(self.args.parallel_block):
-            #     if requests[i] is not None:
-            #         update_indices.append(i)
-            #         valid_requests.append(requests[i])
-            #
-            # matches_over_new = self.args.parallel_block - len(update_indices)
-            # if matches_over_new > matches_over:
-            #     matches_over = matches_over_new
-            #     print(str(matches_over) + " games decided!")
-            #
-            # if len(update_indices) > 0:
-            #     pis, vs = self.nnet.predict_parallel(valid_requests)
-            #     self.update_predictions(pis, vs, update_indices)
-            # if it % self.args.numMCTSSims == 0:
-            #     end_time = time.time()
-            #     print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
-            #     start_time = end_time
-            # it += 1
-            self.one_iter()
+            requests = self.get_requests()
+
+            update_indices = []
+            valid_requests = []
+
+            for i in range(self.args.parallel_block):
+                if requests[i] is not None:
+                    update_indices.append(i)
+                    valid_requests.append(requests[i])
+
+            matches_over_new = self.args.parallel_block - len(update_indices)
+            if matches_over_new > matches_over:
+                matches_over = matches_over_new
+                print(str(matches_over) + "/" + str(self.args.parallel_block) + " games decided!")
+
+            if len(update_indices) > 0:
+                pis, vs = self.nnet.predict_parallel(valid_requests)
+                self.update_predictions(pis, vs, update_indices)
+            if it % self.args.numMCTSSims == 0:
+                end_time = time.time()
+                print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
+                start_time = end_time
+            it += 1
+            # self.one_iter()
 
         return self.compile_train_examples()
 
