@@ -124,6 +124,7 @@ class Arena():
         maxeps = int(num)
 
         num = int(num / 6)
+        max_scores = num * 4
         # oneWon = 0
         # twoWon = 0
         # draws = 0
@@ -140,10 +141,11 @@ class Arena():
                     print(gameResult)
                     for t in range(3):
                         # if bool(p == lonely_player) != bool(t != lonely_turn):
-                        if t == lonely_turn:
-                            scores[lonely_player-1] += gameResult[t]
-                        else:
-                            scores[2-lonely_player] += gameResult[t]
+                        if scores[0] < self.args.updateThreshold * max_scores and scores[1] < self.args.updateThreshold * max_scores:
+                            if t == lonely_turn:
+                                scores[lonely_player-1] += gameResult[t]
+                            else:
+                                scores[2-lonely_player] += gameResult[t]
 
                     print("CUMMULATED RESULTS:")
                     print(scores)
