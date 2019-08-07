@@ -16,15 +16,15 @@ args = dotdict({
     'tempThreshold': 15,
     'updateThreshold': 0.55,
     'maxlenOfQueue': 1000000,
-    'numMCTSSims': 150,
+    'numMCTSSims': 200,
     'arenaCompare': 12,
     'cpuct': 50,
     'max_steps': 600,
-    'parallel_block': 200,
+    'parallel_block': 500,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('checkpoint', 1),
     'numItersForTrainExamplesHistory': 20,
 
