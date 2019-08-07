@@ -14,7 +14,7 @@ MOVES = [[0, -1], [0, 1], [-1, 0], [-1, 1], [1, -1], [1, 0]]
 
 GOLD = 3
 SILVER = 1
-BRONZE = 0
+BRONZE = 1
 
 PRIZES = [GOLD, SILVER, BRONZE]
 
