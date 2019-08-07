@@ -304,7 +304,7 @@ class Coach():
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
                     self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
             else:
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='checkppoint_1.h5')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='checkpoint_1.h5')
 
     def getCheckpointFile(self, iteration):
         return 'checkpoint_' + str(iteration) + '.h5'
