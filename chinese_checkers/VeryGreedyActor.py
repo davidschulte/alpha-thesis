@@ -17,11 +17,11 @@ class VeryGreedyActor:
                     y_start, _, y_end, _ = self.game.get_board().decode_move(move)
                     progress = y_start - y_end
                     if progress > 0:
-                        probs[move] = progress
+                        probs[move] = 4
                     elif progress == 0:
-                        probs[move] = 0.5
+                        probs[move] = 2
                     else:
-                        probs[move] = 0.1
+                        probs[move] = 1
 
         sum_probs = sum(probs)
         probs = [x/float(sum_probs) for x in probs]
