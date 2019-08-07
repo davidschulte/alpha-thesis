@@ -14,7 +14,7 @@ class NNetWrapper:
         self.dropout = 0.3
         self.epochs = 5
         self.batch_size = 64
-        self.num_channels = 256
+        self.num_channels = 64
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
 

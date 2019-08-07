@@ -8,8 +8,9 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor
-from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame
+# from chinese_checkers.VeryGreedyActor import VeryGreedyActor as Actor
+from chinese_checkers.RandomActor import RandomActor as Actor
+from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -53,7 +54,7 @@ class Coach():
         self.games = None
         self.mctss = None
 
-        self.greedy_actor = VeryGreedyActor(game)
+        self.greedy_actor = Actor(game)
 
     def initialize_parallel(self):
         self.all_train_examples = [[] for _ in range(self.args.parallel_block)]
@@ -64,7 +65,6 @@ class Coach():
         self.all_done = [False] * self.args.parallel_block
         self.games = [ChineseCheckersGame() for _ in range(self.args.parallel_block)]
         self.mctss = [MCTS(self.games[i], self.nnet, self.args) for i in range(self.args.parallel_block)]
-
 
     def execute_greedy_episode(self):
         """
@@ -94,7 +94,9 @@ class Coach():
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
                 canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                pi = self.greedy_actor.getActionProb(canonicalBoard, episodeStep < 10)
+                # pi = self.greedy_actor.getActionProb(canonicalBoard, False)
+                pi = self.greedy_actor.getActionProb(canonicalBoard)
+
                 trainExamples.append([canonicalBoard, curPlayer, pi, None])
                 action = np.random.choice(len(pi), p=pi)
             else:
@@ -274,14 +276,14 @@ class Coach():
                     # NB! the examples were collected using the model from the previous iteration, so (i-1)
                     self.saveTrainExamples(i)
             
-                # shuffle examples before training
-                trainExamples = []
-                for e in self.trainExamplesHistory:
-                    trainExamples.extend(e)
-                shuffle(trainExamples)
+                    # shuffle examples before training
+                    trainExamples = []
+                    for e in self.trainExamplesHistory:
+                        trainExamples.extend(e)
+                    shuffle(trainExamples)
 
-            else:
-                trainExamples = iterationTrainExamples
+                else:
+                    trainExamples = iterationTrainExamples
 
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')

@@ -194,22 +194,22 @@ class MCTS():
         for a in range(self.game.getActionSize()):
             if valids[a]:
                 if (s, a, player) in self.Qsa:
-                    # qsa = self.Qsa[(s, a, player)]
-                    # pssa = self.Ps[(s, player)][a]
-                    # ns = self.Ns[(s, player)]
-                    # nsa = self.Nsa[(s, a, player)]
-                    # exploitation = self.Qsa[(s, a, player)]
-                    # exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (1 + self.Nsa[(s, a, player)])
+                    qsa = self.Qsa[(s, a, player)]
+                    pssa = self.Ps[(s, player)][a]
+                    ns = self.Ns[(s, player)]
+                    nsa = self.Nsa[(s, a, player)]
+                    exploitation = self.Qsa[(s, a, player)]
+                    exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (1 + self.Nsa[(s, a, player)])
                     u = self.Qsa[(s, a, player)] + self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (
                                 1 + self.Nsa[(s, a, player)])
-                    # u = u
+                    u = u
                 else:
-                    # pssa = self.Ps[(s, player)][a]
-                    # nsa = self.Ns[(s, player)]
-                    # exploitation = 0
-                    # exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)
+                    pssa = self.Ps[(s, player)][a]
+                    nsa = self.Ns[(s, player)]
+                    exploitation = 0
+                    exploration = self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)
                     u = self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)  # Q = 0 ?
-                    # u = u
+                    u = u
 
                 if u > cur_best:
                     # if exploitation > 0:

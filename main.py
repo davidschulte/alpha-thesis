@@ -1,7 +1,7 @@
 #!/opt/python/python-3.6/i/bin/python
 
 from ParallelCoach import Coach
-from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
+from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame as Game
 from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from utils import *
 import numpy as np
@@ -19,9 +19,9 @@ args = dotdict({
     'numMCTSSims': 250,
     'arenaCompare': 12,
     'cpuct': 50,
-    'max_steps': 6000,
-    'parallel_block': 200,
-    'greedy_eps': 2000,
+    'max_steps': 30000,
+    'parallel_block': 500,
+    'greedy_eps': 5,
 
     'checkpoint': 'checkpoint',
     'load_model': False,

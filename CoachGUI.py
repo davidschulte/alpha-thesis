@@ -9,7 +9,7 @@ from random import shuffle
 import time
 import cProfile, pstats, io
 from chinese_checkers.VeryGreedyActor import VeryGreedyActor
-from chinese_checkers.GUI import GUI
+from chinese_checkers.TinyGUI import GUI
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -92,7 +92,7 @@ class Coach():
                 # temp = int(episodeStep < self.args.tempThreshold)
                 # temp = 1
                 if first and not self.args.load_model:
-                    pi = self.greedy_actor.getActionProb(canonicalBoard, episodeStep < 10)
+                    pi = self.greedy_actor.getActionProb(canonicalBoard, False)
                 else:
                     pi = self.mcts.getActionProb(self.board, self.curPlayer, temp=1)
                 # print(max(pi))
@@ -156,7 +156,7 @@ class Coach():
 
                 for eps in range(num_eps):
                     self.mcts = MCTS(self.game, self.nnet, self.args)   # reset search tree
-                    iterationTrainExamples += self.executeEpisode(i == 1)
+                    iterationTrainExamples += self.executeEpisode(False)
     
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
