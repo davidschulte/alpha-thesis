@@ -304,16 +304,16 @@ class Board():
         y_coordinates, x_coordinates = np.where(GRID == grid_no)
         return y_coordinates[encoded], x_coordinates[encoded]
 
-    def encode_coordinates(self, y, x):
-        y_coordinates, x_coordinates = np.where(GRID != 0)
-        y_fits = np.where(y_coordinates == y)
-        x_fits = np.where(x_coordinates == x)
-        index_list = np.intersect1d(y_fits, x_fits)
-        if index_list[0] != self.alternative_encode_coordinates(y, x):
-            print("ERROR!")
-        return index_list[0]
+    # def encode_coordinates(self, y, x):
+    #     y_coordinates, x_coordinates = np.where(GRID != 0)
+    #     y_fits = np.where(y_coordinates == y)
+    #     x_fits = np.where(x_coordinates == x)
+    #     index_list = np.intersect1d(y_fits, x_fits)
+    #     if index_list[0] != self.alternative_encode_coordinates(y, x):
+    #         print("ERROR!")
+    #     return index_list[0]
 
-    def alternative_encode_coordinates(self, y, x):
+    def encode_coordinates(self, y, x):
         if y < 5:
             g_base = (y**2 + y) / 2
             g_plus = y + x - 5
@@ -323,18 +323,18 @@ class Board():
 
         return int(g_base + g_plus - 1)
 
-    def encode_coordinates_grid(self, y, x):
-        grid_no = GRID[y, x]
-        y_coordinates, x_coordinates = np.where(GRID == grid_no)
-        y_fits = np.where(y_coordinates == y)
-        x_fits = np.where(x_coordinates == x)
-        index_list = np.intersect1d(y_fits, x_fits)
-        alt_grid_no, g = self.alternative_encode_coordinates_grid(y, x)
-        if grid_no != alt_grid_no or index_list[0] != g:
-            print("ERROR")
-        return grid_no, index_list[0]
+    # def encode_coordinates_grid(self, y, x):
+    #     grid_no = GRID[y, x]
+    #     y_coordinates, x_coordinates = np.where(GRID == grid_no)
+    #     y_fits = np.where(y_coordinates == y)
+    #     x_fits = np.where(x_coordinates == x)
+    #     index_list = np.intersect1d(y_fits, x_fits)
+    #     alt_grid_no, g = self.alternative_encode_coordinates_grid(y, x)
+    #     if grid_no != alt_grid_no or index_list[0] != g:
+    #         print("ERROR")
+    #     return grid_no, index_list[0]
 
-    def alternative_encode_coordinates_grid(self, y, x):
+    def encode_coordinates_grid(self, y, x):
         grid_no = GRID[y,x]
 
         if grid_no == 1:
