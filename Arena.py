@@ -123,8 +123,9 @@ class Arena():
         eps = 0
         maxeps = int(num)
 
-        num = int(num / 6)
         max_scores = num * 4
+
+        num = int(num / 6)
         # oneWon = 0
         # twoWon = 0
         # draws = 0
@@ -132,16 +133,16 @@ class Arena():
         for lonely_player in [1, 2]:
             for lonely_turn in range(3):
                 for _ in range(num):
-                    self.game.reset_board()
-                    print("New Game")
-                    print("Lonely Player: " + str(lonely_player))
-                    print("Lonely Turn: " + str(lonely_turn+1))
-                    gameResult = self.playGame(lonely_player, lonely_turn, verbose=verbose)
-                    print("RESULTS")
-                    print(gameResult)
-                    for t in range(3):
-                        # if bool(p == lonely_player) != bool(t != lonely_turn):
-                        if scores[0] < self.args.updateThreshold * max_scores and scores[1] < self.args.updateThreshold * max_scores:
+                    if scores[0] < self.args.updateThreshold * max_scores and scores[1] < self.args.updateThreshold * max_scores:
+                        self.game.reset_board()
+                        print("New Game")
+                        print("Lonely Player: " + str(lonely_player))
+                        print("Lonely Turn: " + str(lonely_turn+1))
+                        gameResult = self.playGame(lonely_player, lonely_turn, verbose=verbose)
+                        print("RESULTS")
+                        print(gameResult)
+                        for t in range(3):
+                            # if bool(p == lonely_player) != bool(t != lonely_turn):
                             if t == lonely_turn:
                                 scores[lonely_player-1] += gameResult[t]
                             else:
