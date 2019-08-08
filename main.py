@@ -18,7 +18,7 @@ args = dotdict({
     'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 50,
+    'cpuct': 20,
     'max_steps': 600,
     'parallel_block': 500,
     'greedy_eps': 500,
@@ -26,7 +26,7 @@ args = dotdict({
     'checkpoint': 'checkpoint',
     'load_model': True,
     'load_folder_file': ('checkpoint', 1),
-    'numItersForTrainExamplesHistory': 20,
+    'numItersForTrainExamplesHistory': 5,
 
 })
 
@@ -39,7 +39,7 @@ if __name__=="__main__":
 
     c = Coach(g, nnet, args)
 
-    # if args.load_model:
-    #     print("Load trainExamples from file")
-    #     c.loadTrainExamples()
+    if args.load_model:
+        print("Load trainExamples from file")
+        c.loadTrainExamples()
     c.learn()
