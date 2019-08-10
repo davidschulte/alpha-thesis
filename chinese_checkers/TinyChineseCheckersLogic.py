@@ -137,7 +137,7 @@ class Board():
             y_nn, x_nn, field_nn = self.step(y, x, direction, board, 2)
             if field_nn == EMPTY:
                 _, _, field_n = self.step(y, x, direction, board, 1)
-                if field_n in [1, 2, 3]:
+                if field_n != 0:
                     jumps.append((y_nn, x_nn))
         return jumps
 
@@ -248,6 +248,7 @@ class Board():
         if previous == 0:
             previous = 3
         return previous
+
 
     def get_legal_moves(self, board, player):
         legal_moves_direct = []
@@ -422,3 +423,25 @@ class Board():
     #                 rotated_board[new_y, new_x] = player
     #
     #     return rotated_board
+
+    def get_possible_board(self, y_start, x_start, board):
+        possible_board = np.zeros((9,9))
+        reachables_direct = self.get_reachables_direct(y_start, x_start, board)
+        reachables_jumping = self.get_reachables_jump(y_start, x_start, board)
+        for (_, _, direction) in reachables_direct:
+            y_end, x_end = y_start + MOVES[direction][0], x_start + MOVES[direction][1]
+            possible_board[y_end, x_end] = 1
+
+        for (y_end, x_end) in reachables_jumping:
+            possible_board[y_end, x_end] = 1
+
+        return possible_board
+
+    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
+        if GRID[y_start, x_start] == GRID[y_end, x_end]:
+            return self.encode_move_jumping(y_start, x_start, y_end, x_end)
+        else:
+            diff_y, diff_x = y_end - y_start, x_end - x_start
+            for direction in range(6):
+                if MOVES[direction][0] == diff_y and MOVES[direction][1] == diff_x:
+                    return self.encode_move_direct(y_start, x_start, direction)

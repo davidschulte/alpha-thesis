@@ -193,3 +193,9 @@ class ChineseCheckersGame(Game):
 
     def get_next_player(self, player):
         return self.b.get_next_player(player)
+
+    def get_possible_board(self, y_start, x_start, board):
+        return self.b.get_possible_board(self, y_start, x_start, board)
+
+    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
+        return self.b.get_action_by_coordinates(self, y_start, x_start, y_end, x_end)

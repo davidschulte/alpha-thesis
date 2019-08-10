@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+from chinese_checkers.TinyChineseCheckersLogic import Board as logic
 MOVES = [[0, 1], [-1, 1], [1, -1], [1, 0]]
 Y_OFFSET = 17
 X_OFFSET = 17
@@ -38,17 +39,6 @@ START = np.array([[4, 4, 4, 4, 4, 4, 0, 4, 4],  # 0
                   [4, 4, 1, 1, 4, 4, 4, 4, 4],  # 7
                   [4, 4, 1, 4, 4, 4, 4, 4, 4]]).astype('int8')  # 8
 
-                # 0  1  2  3  4  5  6  7  8  9 10 11 12
-GRID = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0], #0
-                 [0, 0, 0, 0, 0, 2, 3, 0, 0], #1
-                 [0, 0, 0, 0, 1, 4, 1, 0, 0], #2
-                 [0, 0, 0, 2, 3, 2, 3, 0, 0], #3
-                 [0, 0, 1, 4, 1, 4, 1, 0, 0], #4
-                 [0, 0, 3, 2, 3, 2, 0, 0, 0], #5
-                 [0, 0, 1, 4, 1, 0, 0, 0, 0], #6
-                 [0, 0, 3, 2, 0, 0, 0, 0, 0], #7
-                 [0, 0, 1, 0, 0, 0, 0, 0, 0]]).astype('int8') #8
-
 
 # one = myfont.render('1', False, (0, 0, 0))
 # two = myfont.render('2', False, (0, 0, 0))
@@ -65,6 +55,7 @@ class GUI:
         self.draw_areas(self.window)
         self.draw_lines(self.window)
         self.old_board = START
+        self.logic = logic()
 
         pygame.font.init()
         self.myfont = pygame.font.SysFont('Arial', 15)
@@ -78,6 +69,16 @@ class GUI:
         y = Y_OFFSET + row * Y_STEP
         x = X_OFFSET + column * X_STEP + (row - 6) * X_STEP / 2
         return y, x
+
+    def pos_to_board_coordinates(self, pos):
+        (pos_x, pos_y) = pos
+        for row in range(9):
+            for column in range(9):
+                y, x = self.coordinates_to_pos(row, column)
+                if (pos_y - y)**2 + (pos_x - x) ** 2 < R ** 2:
+                    return row, column
+
+        return -1, -1
 
     def draw_line(self, surface, y1, x1, y2, x2, color):
         pygame.draw.line(surface,color, (x1, y1), (x2, y2), line_width)
@@ -146,5 +147,43 @@ class GUI:
 
         self.old_board = board
 
-        pygame.time.wait(1000)
+        pygame.time.wait(100)
             # timer -= 1
+
+    def draw_possibles(self, possible_board):
+        for y in range(9):
+            for x in range(9):
+                if possible_board[y, x] == 1:
+                    self.draw_figure(self.window, y, x, R, BLACK)
+                    self.draw_figure(self.window, y, x, R-2, PINK)
+        pygame.display.update()
+
+
+
+    def get_action(self, board):
+        selected = False
+        possible_board = None
+        start_y, start_x, end_y, end_x = -1, -1, -1, -1
+        while True:
+
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pos = pygame.mouse.get_pos()
+                    y, x = self.pos_to_board_coordinates(pos)
+                    if y != -1:
+                        if selected:
+                            if possible_board[y, x] == 1:
+                                end_y, end_x = y, x
+                                action = self.logic.get_action_by_coordinates(start_y, start_x, end_y, end_x)
+                                return action
+                            else:
+                                selected = False
+                                self.draw_board(board, 0)
+
+                        else:
+                            if board[y, x] == 1:
+                                start_y, start_x = y, x
+                                possible_board = self.logic.get_possible_board(y, x, board)
+                                self.draw_possibles(possible_board)
+                                selected = True
+
