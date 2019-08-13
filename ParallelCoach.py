@@ -59,7 +59,7 @@ class Coach():
     def initialize_parallel(self):
         self.all_train_examples = [[] for _ in range(self.args.parallel_block)]
         self.all_boards = [self.game.getInitBoard()] * self.args.parallel_block
-        self.all_episode_steps = [0] * self.args.parallel_block
+        self.all_episode_steps = [1] * self.args.parallel_block
         self.all_scores = [[0, 0, 0] for _ in range(self.args.parallel_block)]
         self.all_cur_players = [1] * self.args.parallel_block
         self.all_done = [False] * self.args.parallel_block
@@ -182,7 +182,7 @@ class Coach():
                     if mcts.get_done():
                         s = self.game.stringRepresentation(board)
                         mcts.Visited.append(s)
-                        pi = mcts.get_counts(board, cur_player)
+                        pi = mcts.get_counts(board, cur_player, self.all_episode_steps[n] > 30)
                         canonical_board = self.game.getCanonicalForm(board, cur_player)
                         self.all_train_examples[n].append([canonical_board, cur_player, pi, None])
                         action = np.random.choice(len(pi), p=pi)

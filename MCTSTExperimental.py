@@ -46,7 +46,7 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
-    def getActionProb(self, board, player, temp=1):
+    def getActionProb(self, board, player, best=False):
         """
         This function performs numMCTSSims simulations of MCTS starting from
         canonicalBoard.
@@ -77,12 +77,12 @@ class MCTS():
         # test = sum(counts)
         # if np.count_nonzero(np.array(counts)) < 3:
         #     print("DEBUG")
-        # valids = np.array(self.game.getValidMoves(self.game.getCanonicalForm(board, player),1))
-        #
-        # ways = np.array(counts)
-        # print(ways[np.nonzero(valids)])
-        # print(self.max_depth)
-        if temp == 0:
+        valids = np.array(self.game.getValidMoves(board, player))
+
+        ways = np.array(counts)
+        print(ways[np.nonzero(valids)])
+        print(self.max_depth)
+        if best:
             bestA = np.argmax(counts)
             probs = [0] * len(counts)
             probs[bestA] = 1

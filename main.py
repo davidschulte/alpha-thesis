@@ -18,7 +18,7 @@ args = dotdict({
     'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 20,
+    'cpuct': 10,
     'max_steps': 600,
     'parallel_block': 500,
     'greedy_eps': 500,

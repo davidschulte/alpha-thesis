@@ -12,9 +12,9 @@ args = dotdict({
     'tempThreshold': 15,
     'updateThreshold': 0.55,
     'maxlenOfQueue': 1000000,
-    'numMCTSSims': 2,
+    'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 5,
+    'cpuct': 10,
     'max_steps': 600,
     'parallel_block': 500,
     'greedy_eps': 500,
@@ -31,8 +31,9 @@ nn1.load_first_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
 mcts1 = MCTS(game, nn1, args)
 # mcts2 = MCTS(game, nn1, args)
-actor = ForwardActor(game)
+actor = VeryGreedyActor(game)
+forward = ForwardActor(game)
 
-evaluator = Evaluator(actor, actor, actor, False)
+evaluator = Evaluator(mcts1, mcts1, mcts1, True)
 for _ in range(100):
     evaluator.play_game()

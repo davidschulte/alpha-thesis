@@ -128,11 +128,18 @@ class MCTS():
         self.iter = 0
         self.B = {}
 
-    def get_counts(self, board, player):
+    def get_counts(self, board, player, best=False):
         if self.iter < self.args.numMCTSSims:
             return None
         s = self.game.stringRepresentation(board)
         counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+
+        if best:
+            bestA = np.argmax(counts)
+            probs = [0] * len(counts)
+            probs[bestA] = 1
+            return probs
+
         sum_counts = sum(counts)
         if sum_counts == 0:
             print("SUM COUNTS 0!")

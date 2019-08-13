@@ -135,7 +135,7 @@ class Board():
         jumps = []
         for direction in range(6):
             y_nn, x_nn, field_nn = self.step(y, x, direction, board, 2)
-            if field_nn == EMPTY:
+            if field_nn == EMPTY and self.right_zone(y, x, y_nn, x_nn):
                 _, _, field_n = self.step(y, x, direction, board, 1)
                 if field_n != 0:
                     jumps.append((y_nn, x_nn))
