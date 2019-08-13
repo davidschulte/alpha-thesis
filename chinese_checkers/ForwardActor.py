@@ -1,4 +1,4 @@
-class VeryGreedyActor:
+class ForwardActor:
 
     def __init__(self, game):
         self.game = game
@@ -9,15 +9,19 @@ class VeryGreedyActor:
 
         probs = [0] * self.game.getActionSize()
 
+        max_progress = -9
         for move in range(len(probs)):
             if valids[move] == 1:
                 y_start, _, y_end, _ = self.game.get_board().decode_move(move)
                 progress = y_start - y_end
-                if progress > 0:
-                    probs[move] = 4
-                elif progress == 0:
-                    probs[move] = 2
-                else:
+                if progress > max_progress:
+                    max_progress = progress
+
+        for move in range(len(probs)):
+            if valids[move] == 1:
+                y_start, _, y_end, _ = self.game.get_board().decode_move(move)
+                progress = y_start - y_end
+                if progress == max_progress:
                     probs[move] = 1
 
         sum_probs = sum(probs)

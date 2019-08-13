@@ -77,11 +77,11 @@ class MCTS():
         # test = sum(counts)
         # if np.count_nonzero(np.array(counts)) < 3:
         #     print("DEBUG")
-        valids = np.array(self.game.getValidMoves(self.game.getCanonicalForm(board, player),1))
-
-        ways = np.array(counts)
-        print(ways[np.nonzero(valids)])
-        print(self.max_depth)
+        # valids = np.array(self.game.getValidMoves(self.game.getCanonicalForm(board, player),1))
+        #
+        # ways = np.array(counts)
+        # print(ways[np.nonzero(valids)])
+        # print(self.max_depth)
         if temp == 0:
             bestA = np.argmax(counts)
             probs = [0] * len(counts)

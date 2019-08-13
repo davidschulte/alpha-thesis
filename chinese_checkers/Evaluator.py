@@ -20,7 +20,8 @@ class Evaluator:
         iter_step = 1
         scores = [0, 0, 0]
         self.game.reset_board()
-        self.gui.draw_board(board, iter_step)
+        if self.show:
+            self.gui.draw_board(board, iter_step)
 
         while np.count_nonzero(scores) < 2:
             if scores[curPlayer-1] == 0:
@@ -31,8 +32,12 @@ class Evaluator:
                     a = np.random.choice(len(pi), p=pi)
 
                 board, curPlayer = self.game.getNextState(board, curPlayer, a)
-                self.gui.draw_board(board, iter_step)
+                if self.show:
+                    self.gui.draw_board(board, iter_step)
                 iter_step += 1
             else:
                 a = self.game.getActionSize()-1
                 board, curPlayer = self.game.getNextState(board, curPlayer, a)
+
+            scores = self.game.getGameEnded(board, False)
+        print(scores)

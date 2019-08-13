@@ -11,6 +11,7 @@ import cProfile, pstats, io
 from chinese_checkers.VeryGreedyActor import VeryGreedyActor as Actor
 # from chinese_checkers.RandomActor import RandomActor as Actor
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
+from threading import *
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 
 def profile(fnc):
@@ -53,6 +54,7 @@ class Coach():
         self.all_done = None
         self.games = None
         self.mctss = None
+        self.requests =  None
 
         self.greedy_actor = Actor(game)
 
@@ -123,48 +125,123 @@ class Coach():
 
         matches_over = 0
         while False in self.all_done:
-            requests = self.get_requests()
+            # self.requests = [None] * self.args.parallel_block
+            # self.get_requests_parallel()
+            #
+            # update_indices = []
+            # valid_requests = []
+            #
+            # for i in range(self.args.parallel_block):
+            #     if self.requests[i] is not None:
+            #         update_indices.append(i)
+            #         valid_requests.append(self.requests[i])
+            #
+            # matches_over_new = self.args.parallel_block - len(update_indices)
+            # if matches_over_new > matches_over:
+            #     matches_over = matches_over_new
+            #     print(str(matches_over) + "/" + str(self.args.parallel_block) + " games decided!")
+            #
+            # if len(update_indices) > 0:
+            #     pis, vs = self.nnet.predict_parallel(valid_requests)
+            #     self.update_predictions(pis, vs, update_indices)
+            # if it % self.args.numMCTSSims == 0:
+            #     end_time = time.time()
+            #     print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
+            #     start_time = end_time
+            # it += 1
+            start = time.time()
+            self.one_iter()
+            end = time.time() - start
+            print("serial: " + str(end))
+            start = time.time()
+            self.one_iter_parallel()
+            end = time.time() - start
+            print("parallel: " + str(end))
 
-            update_indices = []
-            valid_requests = []
-
-            for i in range(self.args.parallel_block):
-                if requests[i] is not None:
-                    update_indices.append(i)
-                    valid_requests.append(requests[i])
-
-            matches_over_new = self.args.parallel_block - len(update_indices)
-            if matches_over_new > matches_over:
-                matches_over = matches_over_new
-                print(str(matches_over) + "/" + str(self.args.parallel_block) + " games decided!")
-
-            if len(update_indices) > 0:
-                pis, vs = self.nnet.predict_parallel(valid_requests)
-                self.update_predictions(pis, vs, update_indices)
-            if it % self.args.numMCTSSims == 0:
-                end_time = time.time()
-                print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
-                start_time = end_time
-            it += 1
-            # self.one_iter()
-            # print(self.all_episode_steps)
 
         return self.compile_train_examples()
 
-
+    @profile
     def one_iter(self):
-        requests = self.get_requests()
+        self.requests = [None] * self.args.parallel_block
+        self.requests = self.get_requests()
 
         update_indices = []
         valid_requests = []
 
         for i in range(self.args.parallel_block):
-            if requests[i] is not None:
+            if self.requests[i] is not None:
                 update_indices.append(i)
-                valid_requests.append(requests[i])
+                valid_requests.append(self.requests[i])
 
         pis, vs = self.nnet.predict_parallel(valid_requests)
         self.update_predictions(pis, vs, update_indices)
+
+    @profile
+    def one_iter_parallel(self):
+        self.requests = [None] * self.args.parallel_block
+        self.get_requests_parallel()
+
+        update_indices = []
+        valid_requests = []
+
+        for i in range(self.args.parallel_block):
+            if self.requests[i] is not None:
+                update_indices.append(i)
+                valid_requests.append(self.requests[i])
+
+        pis, vs = self.nnet.predict_parallel(valid_requests)
+        self.update_predictions(pis, vs, update_indices)
+
+    def get_several_requests(self, start_index, length):
+        for n in range(start_index * length, (start_index + 1) * length):
+            if not self.all_done[n]:
+                request_state = None
+                scores = self.all_scores[n]
+                done = self.all_done[n]
+                while not done and request_state is None:
+                    game = self.games[n]
+                    mcts = self.mctss[n]
+                    board = self.all_boards[n]
+                    cur_player = self.all_cur_players[n]
+                    episode_step = self.all_episode_steps[n]
+                    # mcts.search(board, cur_player, 0)
+                    # mcts.add_iter()
+                    training_examples = []
+                    if mcts.get_done():
+                        s = game.stringRepresentation(board)
+                        mcts.Visited.append(s)
+                        pi = mcts.get_counts(board, cur_player)
+                        canonical_board = game.getCanonicalForm(board, cur_player)
+                        training_examples.append([canonical_board, cur_player, pi, None])
+                        action = np.random.choice(len(pi), p=pi)
+                        board, cur_player = game.getNextState(board, cur_player, action)
+                        scores = game.getGameEnded(board, False)
+                        episode_step += 1
+                        if episode_step > self.args.max_steps or np.count_nonzero(scores) > 1:
+                            done = True
+                        else:
+                            if scores[cur_player-1] != 0:
+                                action = game.getActionSize()-1
+                                _, cur_player = game.getNextState(board, cur_player, action)
+                    if not done:
+                        request_state = mcts.search(board, cur_player, 0)
+
+                self.all_train_examples[n].extend(training_examples)
+                self.all_episode_steps[n] = episode_step
+                self.all_done[n] = done
+                self.all_boards[n] = board
+                self.all_scores[n] = scores
+                self.all_cur_players[n] = cur_player
+                self.requests[n] = request_state
+
+    def get_requests_parallel(self):
+        thread_list = [Thread(target=self.get_several_requests, args=(start, 250)) for start in range(0, int(self.args.parallel_block / 250))]
+        for t in thread_list:
+            t.start()
+
+        for t in thread_list:
+            t.join()
 
     def get_requests(self):
         all_request_states = [None] * self.args.parallel_block
@@ -204,6 +281,7 @@ class Coach():
                 all_request_states[n] = request_state
 
         return all_request_states
+
 
     def update_predictions(self, pis, vs, update_indices):
         for i in range(len(update_indices)):

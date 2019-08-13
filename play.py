@@ -4,6 +4,7 @@ from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from chinese_checkers.Evaluator import Evaluator
 from MCTSTExperimental import MCTS
 from chinese_checkers.VeryGreedyActor import VeryGreedyActor
+from chinese_checkers.ForwardActor import ForwardActor
 
 args = dotdict({
     'numIters': 1000,
@@ -29,8 +30,9 @@ nn1 = nn(game)
 nn1.load_first_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
 mcts1 = MCTS(game, nn1, args)
-mcts2 = MCTS(game, nn1, args)
-actor = VeryGreedyActor(game)
+# mcts2 = MCTS(game, nn1, args)
+actor = ForwardActor(game)
 
-evaluator = Evaluator(mcts1, actor, actor, True)
-evaluator.play_game()
+evaluator = Evaluator(actor, actor, actor, False)
+for _ in range(100):
+    evaluator.play_game()

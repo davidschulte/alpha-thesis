@@ -56,6 +56,7 @@ class MCTS():
             if np.count_nonzero(self.Es[s]) > 1:
                 # terminal node
                 self.back_propagate(self.Es[s])
+                # print("GAME OVER")
                 return None
 
             if depth == 0:
@@ -63,8 +64,10 @@ class MCTS():
             else:
                 if s in self.Visited:
                     self.back_propagate(self.Es[s])
+                    print("VISITED")
                     return None
                 if (s, player) in self.Loop:
+                    print("LOOP")
                     self.back_propagate(self.Es[s])
                     return None
                 else:
@@ -100,12 +103,12 @@ class MCTS():
             a = best_act
 
             self.trace.append([s, a, player])
-            if (s, player) in self.B:
-                self.B[(s, player)] = board
+            if (s, a, player) in self.B:
+                board = self.B[(s, a, player)]
                 player = self.game.get_next_player(player)
             else:
                 board, next_player = self.game.getNextState(board, player, a)
-                self.B[(s, player)] = board
+                self.B[(s, a, player)] = board
                 player = next_player
             depth += 1
 
@@ -133,8 +136,7 @@ class MCTS():
         sum_counts = sum(counts)
         if sum_counts == 0:
             print("SUM COUNTS 0!")
-            canonical_board = self.game.getCanonicalForm(board, player)
-            counts = self.game.getValidMoves(canonical_board, 1)
+            counts = self.game.getValidMoves(board, player)
             sum_counts = sum(counts)
 
         probs = [x / float(sum_counts) for x in counts]

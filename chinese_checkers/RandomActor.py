@@ -3,9 +3,9 @@ class RandomActor:
     def __init__(self, game):
         self.game = game
 
-    def getActionProb(self, canonicalBoard):
+    def getActionProb(self, board, player):
 
-        valids = self.game.getValidMoves(canonicalBoard, 1)
+        valids = self.game.getValidMoves(board, player)
 
         probs = valids
         sum_probs = sum(probs)

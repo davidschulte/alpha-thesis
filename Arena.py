@@ -89,7 +89,7 @@ class Arena():
             else:
                 action = self.game.getActionSize()-1
 
-            valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
+            valids = self.game.getValidMoves(board, curPlayer)
 
             if valids[action]==0:
                 print(action)

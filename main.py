@@ -18,14 +18,14 @@ args = dotdict({
     'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 10,
+    'cpuct': 20,
     'max_steps': 600,
     'parallel_block': 500,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
-    'load_model': True,
-    'load_folder_file': ('checkpoint', 5),
+    'load_model': False,
+    'load_folder_file': ('checkpoint', 1),
     'numItersForTrainExamplesHistory': 5,
 
 })
