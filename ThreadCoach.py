@@ -125,38 +125,38 @@ class Coach():
 
         matches_over = 0
         while False in self.all_done:
-            # self.requests = [None] * self.args.parallel_block
-            # self.get_requests_parallel()
-            #
-            # update_indices = []
-            # valid_requests = []
-            #
-            # for i in range(self.args.parallel_block):
-            #     if self.requests[i] is not None:
-            #         update_indices.append(i)
-            #         valid_requests.append(self.requests[i])
-            #
-            # matches_over_new = self.args.parallel_block - len(update_indices)
-            # if matches_over_new > matches_over:
-            #     matches_over = matches_over_new
-            #     print(str(matches_over) + "/" + str(self.args.parallel_block) + " games decided!")
-            #
-            # if len(update_indices) > 0:
-            #     pis, vs = self.nnet.predict_parallel(valid_requests)
-            #     self.update_predictions(pis, vs, update_indices)
-            # if it % self.args.numMCTSSims == 0:
-            #     end_time = time.time()
-            #     print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
-            #     start_time = end_time
-            # it += 1
-            start = time.time()
-            self.one_iter()
-            end = time.time() - start
-            print("serial: " + str(end))
-            start = time.time()
-            self.one_iter_parallel()
-            end = time.time() - start
-            print("parallel: " + str(end))
+            self.requests = [None] * self.args.parallel_block
+            self.get_requests_parallel()
+
+            update_indices = []
+            valid_requests = []
+
+            for i in range(self.args.parallel_block):
+                if self.requests[i] is not None:
+                    update_indices.append(i)
+                    valid_requests.append(self.requests[i])
+
+            matches_over_new = self.args.parallel_block - len(update_indices)
+            if matches_over_new > matches_over:
+                matches_over = matches_over_new
+                print(str(matches_over) + "/" + str(self.args.parallel_block) + " games decided!")
+
+            if len(update_indices) > 0:
+                pis, vs = self.nnet.predict_parallel(valid_requests)
+                self.update_predictions(pis, vs, update_indices)
+            if it % self.args.numMCTSSims == 0:
+                end_time = time.time()
+                print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
+                start_time = end_time
+            it += 1
+            # start = time.time()
+            # self.one_iter()
+            # end = time.time() - start
+            # print("serial: " + str(end))
+            # start = time.time()
+            # self.one_iter_parallel()
+            # end = time.time() - start
+            # print("parallel: " + str(end))
 
 
         return self.compile_train_examples()
@@ -236,7 +236,7 @@ class Coach():
                 self.requests[n] = request_state
 
     def get_requests_parallel(self):
-        thread_list = [Thread(target=self.get_several_requests, args=(start, 250)) for start in range(0, int(self.args.parallel_block / 250))]
+        thread_list = [Thread(target=self.get_several_requests, args=(start, 125)) for start in range(0, int(self.args.parallel_block / 125))]
         for t in thread_list:
             t.start()
 
