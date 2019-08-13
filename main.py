@@ -1,6 +1,6 @@
 #!/opt/python/python-3.6/i/bin/python
 
-from ThreadCoach import Coach
+from ParallelCoach import Coach
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame as Game
 from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from utils import *
