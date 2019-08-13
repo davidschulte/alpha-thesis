@@ -249,7 +249,6 @@ class Board():
             previous = 3
         return previous
 
-
     def get_legal_moves(self, board):
         legal_moves_direct = []
         legal_moves_jumping = []

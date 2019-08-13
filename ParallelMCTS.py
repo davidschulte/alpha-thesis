@@ -102,6 +102,13 @@ class MCTS():
 
             a = best_act
 
+            if a < 0:
+                print(a)
+                print(valids)
+                print(board)
+                print(player)
+                print(depth)
+
             self.trace.append([s, a, player])
             if (s, a, player) in self.B:
                 board = self.B[(s, a, player)]
