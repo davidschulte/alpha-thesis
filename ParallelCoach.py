@@ -93,7 +93,8 @@ class Coach():
 
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
-                pi = self.greedy_actor.getActionProb(board, curPlayer)
+                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
+                pi = self.greedy_actor.getActionProb(canonicalBoard, 1)
                 # pi = self.greedy_actor.getActionProb(canonicalBoard)
 
                 trainExamples.append([canonicalBoard, curPlayer, pi, None])
