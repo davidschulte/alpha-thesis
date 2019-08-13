@@ -8,7 +8,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor
+from chinese_checkers.InitializeActor import VeryGreedyActor
 from chinese_checkers.TinyGUI import GUI
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
 

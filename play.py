@@ -3,7 +3,7 @@ from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from chinese_checkers.Evaluator import Evaluator
 from MCTSTExperimental import MCTS
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor
+from chinese_checkers.InitializeActor import VeryGreedyActor
 from chinese_checkers.ForwardActor import ForwardActor
 
 args = dotdict({

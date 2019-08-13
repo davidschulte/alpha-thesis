@@ -8,7 +8,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor as Actor
+from chinese_checkers.InitializeActor import VeryGreedyActor as Actor
 # from chinese_checkers.RandomActor import RandomActor as Actor
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
@@ -93,8 +93,7 @@ class Coach():
 
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
-                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                pi = self.greedy_actor.getActionProb(canonicalBoard, False)
+                pi = self.greedy_actor.getActionProb(board, curPlayer)
                 # pi = self.greedy_actor.getActionProb(canonicalBoard)
 
                 trainExamples.append([canonicalBoard, curPlayer, pi, None])

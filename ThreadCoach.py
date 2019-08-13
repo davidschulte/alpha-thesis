@@ -8,7 +8,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.VeryGreedyActor import VeryGreedyActor as Actor
+from chinese_checkers.InitializeActor import VeryGreedyActor as Actor
 # from chinese_checkers.RandomActor import RandomActor as Actor
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 from threading import *
