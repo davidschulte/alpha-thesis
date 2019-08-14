@@ -1,6 +1,6 @@
 #!/opt/python/python-3.6/i/bin/python
 
-from ParallelCoach import Coach
+from LargeParallelCoach import Coach
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame as Game
 from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
 from utils import *
@@ -24,7 +24,7 @@ args = dotdict({
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint_large',
-    'load_model': False,
+    'load_model': True,
     'load_folder_file': ('checkpoint_large', 1),
     'numItersForTrainExamplesHistory': 5,
 
