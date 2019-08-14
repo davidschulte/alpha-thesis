@@ -14,7 +14,7 @@ MOVES = [[0, -1], [0, 1], [-1, 0], [-1, 1], [1, -1], [1, 0]]
 
 GOLD = 3
 SILVER = 1
-BRONZE = 0
+BRONZE = 1
 
 PRIZES = [GOLD, SILVER, BRONZE]
 
@@ -159,9 +159,9 @@ class Board():
         jumps = []
         for direction in range(6):
             y_nn, x_nn, field_nn = self.step(y, x, direction, board, 2)
-            if field_nn == EMPTY:
+            if field_nn == EMPTY and self.right_zone(y, x, y_nn, x_nn):
                 _, _, field_n = self.step(y, x, direction, board, 1)
-                if field_n in [1, 2, 3]:
+                if field_n != 0:
                     jumps.append((y_nn, x_nn))
         return jumps
 
@@ -181,17 +181,6 @@ class Board():
                 reachables.append((yN, xN, dirN))
 
         return reachables
-
-    # def get_reachables_jump(self, y, x, board, reachables=[]):
-    #     neighbors = self.get_neighbors(y, x, board)
-    #     for yN, xN, valN, dir in neighbors:
-    #         if valN != EMPTY:
-    #             (yNN, xNN, valNN) = self.get_neighbor(yN, xN, dir, board)
-    #             if (yNN, xNN) not in reachables and valNN == EMPTY and self.right_zone(y, x, yNN, xNN):
-    #                 reachables.append((yNN, xNN))
-    #                 reachables = list(set().union(reachables, self.get_reachables_jump(yNN, xNN, board, reachables)))
-    #
-    #     return reachables
 
     def get_reachables_jump(self, y, x, board):
         reachables = [(y,x)]
@@ -347,17 +336,6 @@ class Board():
 
         return int(g_base + g_plus - 1)
 
-    # def encode_coordinates_grid(self, y, x):
-    #     grid_no = GRID[y, x]
-    #     y_coordinates, x_coordinates = np.where(GRID == grid_no)
-    #     y_fits = np.where(y_coordinates == y)
-    #     x_fits = np.where(x_coordinates == x)
-    #     index_list = np.intersect1d(y_fits, x_fits)
-    #     alt_grid_no, g = self.alternative_encode_coordinates_grid(y, x)
-    #     if grid_no != alt_grid_no or index_list[0] != g:
-    #         print("ERROR")
-    #     return grid_no, index_list[0]
-
     def encode_coordinates_grid(self, y, x):
         grid_no = GRID[y,x]
 
@@ -420,29 +398,3 @@ class Board():
                 rotated_board[rotation_index_board[i]] = rotation_board[i]
 
         return rotated_board
-
-    # def alternative_rotate(self, rotation_board, right):
-    #     rotated_board = np.copy(EMPTY_BOARD)
-    #
-    #     if right:
-    #         y_to_y = 0
-    #         x_to_y = 1
-    #         y_to_x = -1
-    #         x_to_x = -1
-    #     else:
-    #         y_to_y = -1
-    #         x_to_y = -1
-    #         y_to_x = 1
-    #         x_to_x = 0
-    #
-    #     for y in range(13):
-    #         for x in range(13):
-    #             player = rotation_board[y,x]
-    #             if player in [1, 2, 3]:
-    #                 y_dir = y - 6
-    #                 x_dir = x - 6
-    #                 new_y = 6 + y_to_y * y_dir + x_to_y * x_dir
-    #                 new_x = 6 + y_to_x * y_dir + x_to_x * x_dir
-    #                 rotated_board[new_y, new_x] = player
-    #
-    #     return rotated_board

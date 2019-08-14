@@ -95,7 +95,8 @@ class ChineseCheckersGame(Game):
             valids[-1] = 1
             return valids
 
-        legal_moves_direct, legal_moves_jumping = self.b.get_legal_moves(board, player)
+        canonical_board = self.getCanonicalForm(board, player)
+        legal_moves_direct, legal_moves_jumping = self.b.get_legal_moves(canonical_board)
 
         for y_start, x_start, direction in legal_moves_direct:
             valids[self.b.encode_move_direct(y_start, x_start, direction)] = 1
@@ -103,6 +104,8 @@ class ChineseCheckersGame(Game):
         for y_start, x_start, y_end, x_end in legal_moves_jumping:
             valids[self.b.encode_move_jumping(y_start, x_start, y_end, x_end)] = 1
 
+        if sum(valids) == 0:
+            valids[-1] = 1
         return valids
 
 
@@ -193,3 +196,9 @@ class ChineseCheckersGame(Game):
 
     def get_next_player(self, player):
         return self.b.get_next_player(player)
+
+    def get_possible_board(self, y_start, x_start, board):
+        return self.b.get_possible_board(self, y_start, x_start, board)
+
+    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
+        return self.b.get_action_by_coordinates(self, y_start, x_start, y_end, x_end)
