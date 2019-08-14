@@ -262,11 +262,11 @@ class Board():
             previous = 3
         return previous
 
-    def get_legal_moves(self, board, player):
+    def get_legal_moves(self, board):
         legal_moves_direct = []
         legal_moves_jumping = []
 
-        player_y_list, player_x_list = np.where(board == player)
+        player_y_list, player_x_list = np.where(board == 1)
         for i in range(len(player_y_list)):
             y_start, x_start = (player_y_list[i], player_x_list[i])
             reachables_direct = self.get_reachables_direct(y_start, x_start, board)
