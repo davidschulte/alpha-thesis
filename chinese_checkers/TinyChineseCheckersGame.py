@@ -104,6 +104,8 @@ class ChineseCheckersGame(Game):
         for y_start, x_start, y_end, x_end in legal_moves_jumping:
             valids[self.b.encode_move_jumping(y_start, x_start, y_end, x_end)] = 1
 
+        if sum(valids) == 0:
+            valids[-1] = 1
         return valids
 
 

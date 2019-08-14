@@ -12,7 +12,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 1,
+    'numEps': 3,
     'tempThreshold': 15,
     'updateThreshold': 0.55,
     'maxlenOfQueue': 1000000,
