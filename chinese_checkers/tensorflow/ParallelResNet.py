@@ -102,4 +102,5 @@ class NNetWrapper:
         # if not os.path.exists(filepath+'.meta'):
         #     raise("No model in path {}".format(filepath))
         self.model = keras.models.load_model(filepath)
+        print(self.model.summary())
         # keras.utils.plot_model(self.model, to_file='model.png')

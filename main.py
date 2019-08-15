@@ -2,7 +2,7 @@
 
 from ParallelCoach import Coach
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame as Game
-from chinese_checkers.tensorflow.ParallelResNet import NNetWrapper as nn
+from chinese_checkers.tensorflow.ResNet import NNetWrapper as nn
 from utils import *
 import numpy as np
 import sys
@@ -20,11 +20,11 @@ args = dotdict({
     'arenaCompare': 12,
     'cpuct': 10,
     'max_steps': 600,
-    'parallel_block': 500,
+    'parallel_block': 200,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('checkpoint', 1),
     'numItersForTrainExamplesHistory': 5,
 

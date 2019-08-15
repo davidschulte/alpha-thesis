@@ -14,14 +14,18 @@ class NNetWrapper:
         self.dropout = 0.3
         self.epochs = 5
         self.batch_size = 64
-        self.num_channels = 256
+        self.num_channels = 128
 
         inputs = keras.Input(shape=(self.board_y, self.board_x))  # Returns a placeholder tensor
 
-        action_size = game.getActionSize()
-
         x = keras.layers.Reshape((self.board_y, self.board_x, 1))(inputs)
+        x = keras.layers.Conv2D(self.num_channels, kernel_size=3, padding='same')(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
 
+        x = self.res_block(x, self.num_channels)
+        x = self.res_block(x, self.num_channels)
+        x = self.res_block(x, self.num_channels)
         x = self.res_block(x, self.num_channels)
         x = self.res_block(x, self.num_channels)
         x = self.res_block(x, self.num_channels)
@@ -30,19 +34,9 @@ class NNetWrapper:
 
         x = keras.layers.Reshape((self.board_y*self.board_x*self.num_channels,))(x)
 
-        x = keras.layers.Dense(512)(x)
-        x = keras.layers.BatchNormalization()(x)
-        x = keras.layers.ReLU()(x)
-        x = keras.layers.Dropout(self.dropout)(x)
+        pi = self.policy_head(x, self.action_size)
 
-        x = keras.layers.Dense(512)(x)
-        x = keras.layers.BatchNormalization()(x)
-        x = keras.layers.ReLU()(x)
-        x = keras.layers.Dropout(self.dropout)(x)
-
-        pi = keras.layers.Dense(action_size, activation='softmax', name='pi')(x)
-
-        v = keras.layers.Dense(3, activation='relu', name='v')(x)
+        v = self.value_head(x)
 
         self.model = keras.Model(inputs=inputs, outputs=[pi, v])
         self.model.compile(optimizer='adam',
@@ -60,22 +54,41 @@ class NNetWrapper:
         x = keras.layers.ReLU()(x)
         return x
 
+    def policy_head(self, input, action_size):
+        x = keras.layers.Dense(256)(input)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
+        x = keras.layers.Dropout(self.dropout)(x)
+        x = keras.layers.Dense(action_size)(x)
+        pi = keras.layers.Softmax(name='pi')(x)
+        return pi
+
+    def value_head(self, input):
+        x = keras.layers.Dense(256)(input)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.ReLU()(x)
+        x = keras.layers.Dropout(self.dropout)(x)
+        x = keras.layers.Dense(3)(x)
+        v = keras.layers.ReLU(name='v')(x)
+        return v
+
+
     def train(self, examples):
         boards, pis, vs = list(zip(*examples))
         self.model.fit(np.array(boards), [np.array(pis), np.array(vs)], epochs=self.epochs, batch_size=self.batch_size)
 
-    def predict(self, board, player):
+    def predict(self, board):
         board = board[np.newaxis, :, :]
         board = board.astype('float32')
         [pi, v] = self.model.predict(board)
         pi = np.reshape(pi, (self.action_size,))
         v = np.reshape(v, (3,))
-        if player == 2:
-            v = np.array([v[2], v[0], v[1]])
-        elif player == 3:
-            v = np.array([v[1], v[2], v[0]])
-
         return pi, v
+
+    def predict_parallel(self, boards):
+        boards = tf.convert_to_tensor(boards, np.float32)
+        return self.model.predict(boards)
+
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
@@ -92,3 +105,12 @@ class NNetWrapper:
         # if not os.path.exists(filepath+'.meta'):
         #     raise("No model in path {}".format(filepath))
         self.model = keras.models.load_model(filepath)
+
+    def load_first_checkpoint(self, folder, iteration):
+        filename = "checkpoint_" + str(iteration) + ".h5"
+        filepath = os.path.join(folder, filename)
+        # if not os.path.exists(filepath+'.meta'):
+        #     raise("No model in path {}".format(filepath))
+        self.model = keras.models.load_model(filepath)
+        print(self.model.summary())
+        # keras.utils.plot_model(self.model, to_file='model.png')
