@@ -5,9 +5,12 @@ class VeryGreedyActor:
 
     def getActionProb(self, board, player):
 
-        valids = self.game.getValidMoves(board, player)
-
         probs = [0] * self.game.getActionSize()
+
+        valids = self.game.getValidMoves(board, player)
+        if valids[-1] == 1:
+            probs[-1] = 1
+            return probs
 
         for move in range(len(probs)):
             if valids[move] == 1:
