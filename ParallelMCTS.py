@@ -110,13 +110,15 @@ class MCTS():
                 print(depth)
 
             self.trace.append([s, a, player])
-            if (s, a, player) in self.B:
-                board = self.B[(s, a, player)]
-                player = self.game.get_next_player(player)
-            else:
-                board, next_player = self.game.getNextState(board, player, a)
-                self.B[(s, a, player)] = board
-                player = next_player
+            # if (s, a, player) in self.B:
+            #     board = self.B[(s, a, player)]
+            #     player = self.game.get_next_player(player)
+            # else:
+            #     board, next_player = self.game.getNextState(board, player, a)
+            #     self.B[(s, a, player)] = board
+            #     player = next_player
+
+            board, player = self.game.getNextState(board, player, a)
             depth += 1
 
 
