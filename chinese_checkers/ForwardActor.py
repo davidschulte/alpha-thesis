@@ -3,7 +3,7 @@ class ForwardActor:
     def __init__(self, game):
         self.game = game
 
-    def getActionProb(self, board, player):
+    def getActionProb(self, board, player, egal):
 
         valids = self.game.getValidMoves(board, player)
 

@@ -14,7 +14,7 @@ args = dotdict({
     'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 10,
+    'cpuct': 25,
     'max_steps': 600,
     'parallel_block': 500,
     'greedy_eps': 500,
@@ -34,6 +34,6 @@ mcts1 = MCTS(game, nn1, args)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(mcts1, mcts1, mcts1, True)
+evaluator = Evaluator(mcts1, forward, forward, True)
 for _ in range(100):
     evaluator.play_game()

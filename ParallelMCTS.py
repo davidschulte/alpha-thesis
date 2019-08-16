@@ -137,7 +137,7 @@ class MCTS():
         self.iter = 0
         self.B = {}
 
-    def get_counts(self, board, player, best=False):
+    def get_counts(self, board, player):
         if self.iter < self.args.numMCTSSims:
             return None
         s = self.game.stringRepresentation(board)
@@ -162,8 +162,6 @@ class MCTS():
         return probs
 
     def get_done(self):
-        if self.iter > self.args.numMCTSSims:
-            print("Debug")
         return self.iter == self.args.numMCTSSims
 
     def update_predictions(self, pi, v):

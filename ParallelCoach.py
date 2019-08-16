@@ -184,9 +184,13 @@ class Coach():
                     if mcts.get_done():
                         s = self.game.stringRepresentation(board)
                         mcts.Visited.append(s)
-                        pi = mcts.get_counts(board, cur_player, self.all_episode_steps[n] > 30)
                         canonical_board = self.game.getCanonicalForm(board, cur_player)
-                        self.all_train_examples[n].append([canonical_board, cur_player, pi, None])
+                        pi = mcts.get_counts(board, cur_player)
+                        self.all_train_examples[n].append([canonical_board, cur_player, pi])
+                        if self.all_episode_steps[n] > 30:
+                            best_actions = np.zeros(self.game.getActionSize())
+                            best_actions[np.where(pi == np.amax(pi))] = 1
+                            pi = best_actions / sum(best_actions)
                         action = np.random.choice(len(pi), p=pi)
                         board, cur_player = game.getNextState(board, cur_player, action)
                         scores = game.getGameEnded(board, False)
