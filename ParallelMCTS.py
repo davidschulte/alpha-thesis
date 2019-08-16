@@ -145,12 +145,6 @@ class MCTS():
 
         self.reset()
 
-        if best:
-            bestA = np.argmax(counts)
-            probs = [0] * len(counts)
-            probs[bestA] = 1
-            return probs
-
         sum_counts = sum(counts)
         if sum_counts == 0:
             print("SUM COUNTS 0!")
