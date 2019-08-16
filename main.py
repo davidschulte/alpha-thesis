@@ -12,7 +12,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 1,
+    'numEps': 4,
     'tempThreshold': 15,
     'updateThreshold': 0.55,
     'maxlenOfQueue': 1000000,
@@ -20,7 +20,7 @@ args = dotdict({
     'arenaCompare': 12,
     'cpuct': 10,
     'max_steps': 600,
-    'parallel_block': 200,
+    'parallel_block': 50,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',

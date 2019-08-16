@@ -72,7 +72,6 @@ class NNetWrapper:
         v = keras.layers.ReLU(name='v')(x)
         return v
 
-
     def train(self, examples):
         boards, pis, vs = list(zip(*examples))
         self.model.fit(np.array(boards), [np.array(pis), np.array(vs)], epochs=self.epochs, batch_size=self.batch_size)

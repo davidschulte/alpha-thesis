@@ -8,6 +8,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
+import gc
 from chinese_checkers.InitializeActor import VeryGreedyActor as Actor
 # from chinese_checkers.RandomActor import RandomActor as Actor
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
@@ -65,6 +66,7 @@ class Coach():
         self.all_done = [False] * self.args.parallel_block
         self.games = [ChineseCheckersGame() for _ in range(self.args.parallel_block)]
         self.mctss = [MCTS(self.games[i], self.nnet, self.args) for i in range(self.args.parallel_block)]
+        gc.collect()
 
     def execute_greedy_episode(self):
         """
