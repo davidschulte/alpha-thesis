@@ -24,7 +24,7 @@ args = dotdict({
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint',
-    'load_model': False,
+    'load_model': True,
     'load_folder_file': ('checkpoint', 1),
     'numItersForTrainExamplesHistory': 5,
 
