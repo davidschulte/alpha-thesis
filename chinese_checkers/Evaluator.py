@@ -28,7 +28,7 @@ class Evaluator:
                 if self.players[curPlayer-1] is None:
                     a = self.gui.get_action(board)
                 else:
-                    pi = self.players[curPlayer-1].getActionProb(board, curPlayer, True)
+                    pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step > 30)
                     a = np.random.choice(len(pi), p=pi)
 
                 board, curPlayer = self.game.getNextState(board, curPlayer, a)

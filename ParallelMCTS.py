@@ -143,6 +143,8 @@ class MCTS():
         s = self.game.stringRepresentation(board)
         counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
+        self.reset()
+
         if best:
             bestA = np.argmax(counts)
             probs = [0] * len(counts)
@@ -157,11 +159,11 @@ class MCTS():
 
         probs = [x / float(sum_counts) for x in counts]
 
-        self.reset()
-
         return probs
 
     def get_done(self):
+        if self.iter > self.args.numMCTSSims:
+            print("Debug")
         return self.iter == self.args.numMCTSSims
 
     def update_predictions(self, pi, v):
