@@ -14,7 +14,7 @@ class Evaluator:
             self.gui = GUI(1)
         self.game = ChineseCheckersGame()
 
-    def play_game(self):
+    def play_game(self, best_start):
         board = self.game.getInitBoard()
         curPlayer = 1
         iter_step = 1
@@ -28,7 +28,7 @@ class Evaluator:
                 if self.players[curPlayer-1] is None:
                     a = self.gui.get_action(board)
                 else:
-                    pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step > 30)
+                    pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step >= best_start)
                     a = np.random.choice(len(pi), p=pi)
 
                 board, curPlayer = self.game.getNextState(board, curPlayer, a)
@@ -41,3 +41,10 @@ class Evaluator:
 
             scores = self.game.getGameEnded(board, False)
         print(scores)
+        return scores, iter_step-1, self.check_second_rule(board, scores)
+
+    def check_second_rule(self, board, scores):
+        for p in range(3):
+            if scores[p] > 0 and not self.game.get_board().get_done(board, p+1, True):
+                return 1
+        return 0

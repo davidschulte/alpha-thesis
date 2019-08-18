@@ -21,7 +21,7 @@ args = dotdict({
 
     'checkpoint': 'checkpoint',
     'load_model': True,
-    'load_folder_file': ('checkpoint', 1),
+    'load_folder_file': ('checkpoint', 6),
     'numItersForTrainExamplesHistory': 5,
 })
 
@@ -36,4 +36,4 @@ forward = ForwardActor(game)
 
 evaluator = Evaluator(mcts1, forward, forward, True)
 for _ in range(100):
-    evaluator.play_game()
+    print(evaluator.play_game(10))
