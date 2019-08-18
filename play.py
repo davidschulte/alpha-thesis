@@ -5,24 +5,14 @@ from chinese_checkers.Evaluator import Evaluator
 from MCTSTExperimental import MCTS
 from chinese_checkers.InitializeActor import VeryGreedyActor
 from chinese_checkers.ForwardActor import ForwardActor
+import numpy as np
 
 args = dotdict({
-    'numIters': 1000,
-    'numEps': 10,
-    'tempThreshold': 15,
-    'updateThreshold': 0.55,
-    'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
-    'arenaCompare': 12,
     'cpuct': 10,
     'max_steps': 600,
-    'parallel_block': 500,
-    'greedy_eps': 500,
 
-    'checkpoint': 'checkpoint',
-    'load_model': True,
     'load_folder_file': ('checkpoint', 6),
-    'numItersForTrainExamplesHistory': 5,
 })
 
 game = ChineseCheckersGame()
@@ -34,6 +24,19 @@ mcts1 = MCTS(game, nn1, args)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(mcts1, forward, forward, True)
-for _ in range(100):
-    print(evaluator.play_game(10))
+evaluator = Evaluator(mcts1, mcts1, mcts1, False)
+scores_all = np.zeros((3,3))
+steps_all = 0
+wrong_win_all = 0
+for _ in range(1000):
+    scores, steps, wrong_win = evaluator.play_game(15)
+    for p in range(3):
+        if scores[p] == 3:
+            scores_all[p,0] += 1
+        elif scores[p] == 1:
+            scores_all[p,1] += 1
+        else:
+            scores_all[p,2] += 1
+    steps_all += steps
+    wrong_win_all += wrong_win
+    print(scores_all)

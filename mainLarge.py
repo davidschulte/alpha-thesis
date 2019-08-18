@@ -12,19 +12,19 @@ np.set_printoptions(threshold=sys.maxsize)
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 1,
+    'numEps': 4,
     'tempThreshold': 15,
     'updateThreshold': 0.55,
     'maxlenOfQueue': 1000000,
     'numMCTSSims': 200,
     'arenaCompare': 12,
-    'cpuct': 10,
+    'cpuct': 25,
     'max_steps': 900,
-    'parallel_block': 500,
+    'parallel_block': 50,
     'greedy_eps': 500,
 
     'checkpoint': 'checkpoint_large',
-    'load_model': True,
+    'load_model': False,
     'load_folder_file': ('checkpoint_large', 1),
     'numItersForTrainExamplesHistory': 5,
 
