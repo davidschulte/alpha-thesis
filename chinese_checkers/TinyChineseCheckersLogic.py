@@ -205,7 +205,7 @@ class Board():
         else:
             return False not in (board[END == player] != EMPTY)
 
-    def get_win_state(self, board, temporary):
+    def get_win_state_old(self, board, temporary):
         if temporary:
             scores = self.scores_temporary
             for player in [1, 2, 3]:
@@ -237,6 +237,37 @@ class Board():
 
         if first_found:
             return self.get_win_state(board, temporary)
+
+        return scores
+
+    def get_win_state(self, board, temporary):
+
+        scores = np.copy(self.scores)
+
+        search_again = True
+
+        while search_again:
+            search_again = False
+
+            still_playing = []
+            for player in [1, 2, 3]:
+                if scores[player - 1] == 0:
+                    still_playing.append(player)
+
+            prize = PRIZES[-len(still_playing)]
+            if len(still_playing) < 3:
+                color_matters = False
+            else:
+                color_matters = True
+
+            for player in still_playing:
+                if self.get_done(board, player, color_matters):
+                    scores[player - 1] = prize
+                    still_playing.remove(player)
+                    search_again = True
+
+        if not temporary:
+            self.scores = scores
 
         return scores
 

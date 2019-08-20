@@ -1,22 +1,29 @@
-from .TinyGUI import GUI
-from .TinyChineseCheckersGame import ChineseCheckersGame
 import numpy as np
 
+TEST = np.array([[4, 4, 4, 4, 4, 4, 1, 4, 4], #0
+                 [4, 4, 4, 4, 4, 1, 1, 4, 4], #1
+                 [4, 4, 0, 0, 1, 1, 2, 0, 0], #2
+                 [4, 4, 0, 0, 0, 1, 0, 0, 4], #3
+                 [4, 4, 3, 0, 0, 0, 0, 4, 4], #4
+                 [4, 3, 3, 0, 2, 2, 2, 4, 4], #5
+                 [3, 3, 0, 3, 0, 2, 2, 4, 4], #6
+                 [4, 4, 0, 0, 4, 4, 4, 4, 4], #7
+                 [4, 4, 0, 4, 4, 4, 4, 4, 4]]).astype('int8')#8
+
 class Evaluator:
-    def __init__(self, player1, player2, player3, show=False):
+    def __init__(self, player1, player2, player3, game, gui, show=False):
         self.players = [player1, player2, player3]
         self.show = show
+        self.game = game
         if None in self.players:
             self.show = True
-        self.gui = None
-        self.game = ChineseCheckersGame()
-        if show:
-            self.gui = GUI(1)
-        self.game = ChineseCheckersGame()
+        self.gui = gui
 
     def play_game(self, best_start):
         board = self.game.getInitBoard()
         curPlayer = 1
+        # board = np.copy(TEST)
+        # curPlayer = 2
         iter_step = 1
         scores = [0, 0, 0]
         self.game.reset_board()

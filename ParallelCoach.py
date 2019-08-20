@@ -70,14 +70,7 @@ class Coach():
 
     def execute_greedy_episode(self):
         """
-        This function executes one episode of self-play, starting with player 1.
-        As the game is played, each turn is added as a training example to
-        trainExamples. The game is played till the game ends. After the game
-        ends, the outcome of the game is used to assign values to each example
-        in trainExamples.
-
-        It uses a temp=1 if episodeStep < tempThreshold, and thereafter
-        uses temp=0.
+        This function executes a game of self-play where each player is played by the Initialize Actor.
 
         Returns:
             trainExamples: a list of examples of the form (canonicalBoard,pi,v)

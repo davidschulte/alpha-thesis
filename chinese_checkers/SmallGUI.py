@@ -1,12 +1,12 @@
 import pygame
 import numpy as np
-from chinese_checkers.TinyChineseCheckersLogic import Board as logic
+from chinese_checkers.SmallChineseCheckersLogic import Board as logic
 MOVES = [[0, 1], [-1, 1], [1, -1], [1, 0]]
-DIM = 9
+DIM = 13
 Y_OFFSET = 17
 X_OFFSET = 17
-Y_STEP = 47.2 * 1.5
-X_STEP = 54.5 * 1.5
+Y_STEP = 47.2
+X_STEP = 54.5
 R = 12
 RED = (255,0,0)
 GREEN = (0, 200, 0 )
@@ -18,27 +18,32 @@ BLACK = (0,0,0,0)
 WHITE = (255, 255, 255)
 
 
-ENDPOINTS_RED = [[0, 6], [2, 4], [2, 6]]
-STARTPOINTS_RED = [[8, 2], [6, 2], [6, 4]]
-ENDPOINTS_YELLOW = [[6, 4], [6, 6], [4, 6]]
-STARTPOINTS_YELLOW = [[2, 2], [2, 4], [4, 2]]
-ENDPOINTS_GREEN = [[6, 0], [6, 2], [4, 2]]
-STARTPOINTS_GREEN = [[2, 8], [2, 6], [4, 6]]
+ENDPOINTS_RED = [[0, 9], [3, 6], [3, 9]]
+STARTPOINTS_RED = [[12, 3], [9, 3], [9, 6]]
+ENDPOINTS_YELLOW = [[9, 9], [9, 6], [6, 9]]
+STARTPOINTS_YELLOW = [[3, 3], [6, 3], [3, 6]]
+ENDPOINTS_GREEN = [[9, 0], [6, 3], [9, 3]]
+STARTPOINTS_GREEN = [[3, 12], [3, 9], [6, 9]]
 
 AREAS = [ENDPOINTS_RED, STARTPOINTS_RED, ENDPOINTS_YELLOW, STARTPOINTS_YELLOW, ENDPOINTS_GREEN, STARTPOINTS_GREEN]
 
 line_width = 3
 
-# 0  1  2  3  4  5  6  7  8  9 10 11 12
-START = np.array([[4, 4, 4, 4, 4, 4, 0, 4, 4],  # 0
-                  [4, 4, 4, 4, 4, 0, 0, 4, 4],  # 1
-                  [4, 4, 2, 2, 2, 0, 3, 3, 3],  # 2
-                  [4, 4, 2, 2, 0, 0, 3, 3, 4],  # 3
-                  [4, 4, 2, 0, 0, 0, 3, 4, 4],  # 4
-                  [4, 0, 0, 0, 0, 0, 0, 4, 4],  # 5
-                  [0, 0, 1, 1, 1, 0, 0, 4, 4],  # 6
-                  [4, 4, 1, 1, 4, 4, 4, 4, 4],  # 7
-                  [4, 4, 1, 4, 4, 4, 4, 4, 4]]).astype('int8')  # 8
+                 # 0  1  2  3  4  5  6  7  8  9 10 11 12
+START = np.array([[4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4], #0
+                  [4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 4, 4, 4], #1
+                  [4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 4, 4, 4], #2
+                  [4, 4, 4, 2, 2, 2, 2, 0, 0, 3, 3, 3, 3], #3
+                  [4, 4, 4, 2, 2, 2, 0, 0, 0, 3, 3, 3, 4], #4
+                  [4, 4, 4, 2, 2, 0, 0, 0, 0, 3, 3, 4, 4], #5
+                  [4, 4, 4, 2, 0, 0, 0, 0, 0, 3, 4, 4, 4], #6
+                  [4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #7
+                  [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4], #8
+                  [0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 4, 4, 4], #9
+                  [4, 4, 4, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4], #10
+                  [4, 4, 4, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4], #11
+                  [4, 4, 4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4]]).astype('int8')#12
+
 
 
 # one = myfont.render('1', False, (0, 0, 0))
@@ -63,12 +68,12 @@ class GUI:
 
     def draw_figure(self, surface, row, column, radius, color):
         y = Y_OFFSET + row * Y_STEP
-        x = X_OFFSET + column * X_STEP + (row - 6) * X_STEP / 2
+        x = X_OFFSET + column * X_STEP + (row - 9) * X_STEP / 2
         pygame.draw.circle(surface, color, (int(x),int(y)), radius)
 
     def coordinates_to_pos(self, row, column):
         y = Y_OFFSET + row * Y_STEP
-        x = X_OFFSET + column * X_STEP + (row - 6) * X_STEP / 2
+        x = X_OFFSET + column * X_STEP + (row - 9) * X_STEP / 2
         return y, x
 
     def pos_to_board_coordinates(self, pos):

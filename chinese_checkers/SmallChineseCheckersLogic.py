@@ -398,3 +398,25 @@ class Board():
                 rotated_board[rotation_index_board[i]] = rotation_board[i]
 
         return rotated_board
+
+    def get_possible_board(self, y_start, x_start, board):
+        possible_board = np.zeros((13,13))
+        reachables_direct = self.get_reachables_direct(y_start, x_start, board)
+        reachables_jumping = self.get_reachables_jump(y_start, x_start, board)
+        for (_, _, direction) in reachables_direct:
+            y_end, x_end = y_start + MOVES[direction][0], x_start + MOVES[direction][1]
+            possible_board[y_end, x_end] = 1
+
+        for (y_end, x_end) in reachables_jumping:
+            possible_board[y_end, x_end] = 1
+
+        return possible_board
+
+    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
+        if GRID[y_start, x_start] == GRID[y_end, x_end]:
+            return self.encode_move_jumping(y_start, x_start, y_end, x_end)
+        else:
+            diff_y, diff_x = y_end - y_start, x_end - x_start
+            for direction in range(6):
+                if MOVES[direction][0] == diff_y and MOVES[direction][1] == diff_x:
+                    return self.encode_move_direct(y_start, x_start, direction)
