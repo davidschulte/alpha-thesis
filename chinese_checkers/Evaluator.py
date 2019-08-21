@@ -19,7 +19,7 @@ class Evaluator:
             self.show = True
         self.gui = gui
 
-    def play_game(self, best_start):
+    def play_game(self, best_start, random_start):
         board = self.game.getInitBoard()
         curPlayer = 1
         # board = np.copy(TEST)
@@ -35,7 +35,12 @@ class Evaluator:
                 if self.players[curPlayer-1] is None:
                     a = self.gui.get_action(board)
                 else:
-                    pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step >= best_start)
+                    if iter_step >= random_start:
+                        pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step >= best_start)
+                    else:
+                        valids = self.game.getValidMoves(board, curPlayer)
+                        sum_valids = sum(valids)
+                        pi = [x / float(sum_valids) for x in valids]
                     a = np.random.choice(len(pi), p=pi)
 
                 board, curPlayer = self.game.getNextState(board, curPlayer, a)

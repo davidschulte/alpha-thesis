@@ -1,6 +1,7 @@
 from collections import deque
 from Arena import Arena
 from ParallelMCTS import MCTS
+from MCTSTExperimental import MCTS as MCTSSingle
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
 import time, os, sys
@@ -297,8 +298,10 @@ class Coach():
             self.nnet.train(trainExamples)
 
             if not greedy:
+                pmcts = MCTSSingle(self.game, self.pnet, self.args)
+                nmcts = MCTSSingle(self.game, self.nnet, self.args)
                 print('PITTING AGAINST PREVIOUS VERSION')
-                arena = Arena(self.pnet, self.nnet, self.game, self.args)
+                arena = Arena(pmcts, nmcts, self.game, self.args)
                 scores = arena.playGames(self.args.arenaCompare)
 
                 if scores[1] == 0 or float(scores[1]) / sum(scores) < self.args.updateThreshold:

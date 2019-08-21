@@ -25,7 +25,7 @@ class Arena():
     """
     An Arena class where any 2 agents can be pit against each other.
     """
-    def __init__(self, nnet1, nnet2, game, args, display=None):
+    def __init__(self, mcts1, mcts2, game, args, display=None):
         """
         Input:
             player 1,2: two functions that takes board as input, return action
@@ -37,15 +37,13 @@ class Arena():
         see othello/OthelloPlayers.py for an example. See pit.py for pitting
         human players/other baselines with each other.
         """
-        self.nnet1 = nnet1
-        self.nnet2 = nnet2
-        # self.player1 = player1
-        # self.player2 = player2
+        self.mcts1 = mcts1
+        self.mcts2 = mcts2
         self.game = game
         self.args = args
         self.display = display
 
-    def playGame(self, lonely_player, turn_lonely, verbose=False):
+    def playGame(self, lonely_player, turn_lonely):
         """
         Executes one episode of a game.
 
@@ -56,11 +54,11 @@ class Arena():
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
         if lonely_player == 1:
-            players = [MCTS(self.game, self.nnet2, self.args), MCTS(self.game, self.nnet2, self.args), MCTS(self.game, self.nnet2, self.args)]
-            players[turn_lonely] = MCTS(self.game, self.nnet1, self.args)
+            players = [self.mcts2, self.mcts2, self.mcts2]
+            players[turn_lonely] = self.mcts1
         else:
-            players = [MCTS(self.game, self.nnet1, self.args), MCTS(self.game, self.nnet1, self.args), MCTS(self.game, self.nnet1, self.args)]
-            players[turn_lonely] = MCTS(self.game, self.nnet2, self.args)
+            players = [self.mcts1, self.mcts1, self.mcts1]
+            players[turn_lonely] = self.mcts2
 
         curPlayer = 1
         board = self.game.getInitBoard()
@@ -73,11 +71,6 @@ class Arena():
             if it % 100 == 0:
                 print(it)
                 print(board)
-
-            if verbose:
-                assert(self.display)
-                print("Turn ", str(it), "Player ", str(curPlayer))
-                self.display(board)
 
             if scores[curPlayer-1] == 0:
                 # canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
@@ -98,16 +91,11 @@ class Arena():
 
             scores = self.game.getGameEnded(board, False)
 
-        if verbose:
-            assert(self.display)
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
-
         print(board)
 
         return scores
 
-    def playGames(self, num, verbose=False):
+    def playGames(self, num):
         """
         Plays num games in which player1 starts num/2 games and player2 starts
         num/2 games.
@@ -138,7 +126,7 @@ class Arena():
                         print("New Game")
                         print("Lonely Player: " + str(lonely_player))
                         print("Lonely Turn: " + str(lonely_turn+1))
-                        gameResult = self.playGame(lonely_player, lonely_turn, verbose=verbose)
+                        gameResult = self.playGame(lonely_player, lonely_turn)
                         print("RESULTS")
                         print(gameResult)
                         for t in range(3):
@@ -158,8 +146,7 @@ class Arena():
                                                                                                                total=bar.elapsed_td, eta=bar.eta_td)
                     bar.next()
 
-
-
         bar.finish()
 
         return scores
+
