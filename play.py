@@ -17,7 +17,7 @@ args = dotdict({
 })
 
 args2 = dotdict({
-    'numMCTSSims': 2,
+    'numMCTSSims': 200,
     'cpuct': 15,
     'max_steps': 600,
 
@@ -36,7 +36,7 @@ mcts1 = MCTS(game, nn1, args)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(None, mcts1, mcts1, game, gui, True)
+evaluator = Evaluator(mcts1, forward, mcts1, game, gui, True)
 scores_all = np.zeros((3, 3))
 steps_all = 0
 wrong_win_all = 0

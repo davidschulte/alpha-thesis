@@ -13,7 +13,7 @@ import numpy as np
 
 
 args = dotdict({
-    'numMCTSSims': 2,
+    'numMCTSSims': 200,
     'cpuct': 150,
     'max_steps': 120,
 })
@@ -24,13 +24,12 @@ args2 = dotdict({
     'max_steps': 120,
 })
 
-versions_all = [1, 2, 3, 6, 8, 10, 11, 12, 13]
-versions = [13, 15]
+versions = [1, 2, 3, 6, 8, 10, 11, 12]
 
 game = ChineseCheckersGame()
 greedy = ForwardActor(game)
 
-for new in range(1,len(versions)):
+for new in range(5,len(versions)):
     print(str(new) + "/" + str(len(versions)))
     nn_new = nn(game)
     nn_new.load_first_checkpoint('checkpoint', versions[new])
@@ -41,11 +40,11 @@ for new in range(1,len(versions)):
     mcts_old = MCTS(game, nn_old, args)
 
     arena = Arena(mcts_new, mcts_old, game, args)
-    results = arena.play_games(120, 1, 7)
+    results = arena.play_games(30, 1, 7)
 
     print(results)
 
-    folder = "tests nnet vs old"
+    folder = "tests mcts 200 150 vs old"
     if not os.path.exists(folder):
         os.makedirs(folder)
     filename = os.path.join(folder, str(versions[new]) + ".pkl")

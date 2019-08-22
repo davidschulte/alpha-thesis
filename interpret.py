@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 import os
 from pickle import Pickler
 
-versions = [2, 3, 6, 8, 10, 11, 12, 13, 15]
+versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15]
 
-results = np.zeros((3, len(versions)))
+results = np.zeros((3, len(versions)-1))
 
 def get_counts(file, player):
     places = [0] * 3
@@ -26,15 +27,28 @@ def get_counts(file, player):
     normalized = [x / sum_places for x in places]
     print(normalized)
 
-    vector = np.array(normalized)
     vector = np.transpose(normalized)
     return vector
 
 
 folder = "tests nnet vs old"
 
-for v in range(len(versions)):
+for v in range(1,len(versions)):
     filename = os.path.join(folder, str(versions[v]) + ".pkl")
-    results[:, v] = get_counts(filename, 1)
+    results[:, v-1] = get_counts(filename, 1)
 
 print(results)
+
+x = np.array([x for x in range(1,len(versions)+1)])
+x = np.array([x for x in range(2,len(versions)+1)])
+for p in range(3):
+    plt.plot(x, results[p,:], marker="o")
+
+plt.legend(["Winner", "Second", "Loser"])
+# plt.title("Neural Net without MCTS against Greedy Actor")
+plt.title("Neural Net without MCTS agains previous version")
+plt.xlabel("Version")
+plt.ylabel("Relative Frequency of position")
+plt.show()
+
+

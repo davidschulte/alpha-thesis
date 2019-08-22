@@ -112,8 +112,6 @@ class GUI:
 
             pygame.draw.polygon(surface, color, coordinates)
 
-
-
     def draw_board(self, board, step):
         # timer = self.timer
         # while timer > 0:
@@ -143,7 +141,8 @@ class GUI:
 
         step_display = self.myfont.render("Step " + str(step), False, (0, 0, 0))
         pygame.draw.rect(self.window, WHITE, [10, 10, 50, 30])
-        self.window.blit(step_display, (10,10))
+        if step >= 0:
+            self.window.blit(step_display, (10,10))
         pygame.display.update()
 
         self.old_board = board
@@ -186,3 +185,7 @@ class GUI:
                                 self.draw_possibles(possible_board)
                                 selected = True
 
+    def snapshot(self, board, filename):
+        self.old_board = board
+        self.draw_board(board, -1)
+        pygame.image.save(self.window, filename)
