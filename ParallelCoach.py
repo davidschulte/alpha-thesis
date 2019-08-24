@@ -322,8 +322,8 @@ class Coach():
         f.closed
 
     def loadTrainExamples(self):
-        file_name = "checkpoint_" + str(self.args.load_folder_file[1]) + ".h5"
-        modelFile = os.path.join(self.args.load_folder_file[0], file_name)
+        file_name = "checkpoint_" + str(self.args.load_example[1]) + ".h5"
+        modelFile = os.path.join(self.args.load_example[0], file_name)
         examplesFile = modelFile+".examples"
         if not os.path.isfile(examplesFile):
             print(examplesFile)
