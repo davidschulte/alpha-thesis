@@ -233,7 +233,7 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
         if self.args.load_model:
-            start = self.args.load_folder_file[1] + 1
+            start = self.args.load_example[1] + 1
         else:
             start = 1
         for i in range(start, self.args.numIters+1):
