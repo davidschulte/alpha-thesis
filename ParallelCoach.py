@@ -32,6 +32,7 @@ def profile(fnc):
 
     return inner
 
+
 class Coach():
     """
     This class executes the self-play + learning. It uses the functions defined

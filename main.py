@@ -25,8 +25,8 @@ args = dotdict({
 
     'checkpoint': 'checkpoint',
     'load_model': True,
-    'load_folder_file': ('checkpoint', 17),
-    'load_example': ('checkpoint', 19),
+    'load_folder_file': ('checkpoint', 23),
+    'load_example': ('checkpoint', 25),
     'numItersForTrainExamplesHistory': 10,
 
 })

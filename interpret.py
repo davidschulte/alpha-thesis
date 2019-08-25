@@ -4,14 +4,14 @@ from matplotlib import pyplot as plt
 import os
 from pickle import Pickler
 
-versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15]
+versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20]
 
-results = np.zeros((3, len(versions)-1))
+results = np.zeros((3, len(versions)))
 
 def get_counts(file, player):
     places = [0] * 3
     dataframe = pd.read_pickle(file)
-    print(dataframe)
+    print(dataframe.to_string())
     array = dataframe.to_numpy()
     for row in range(120):
         for column in range(3):
@@ -31,16 +31,15 @@ def get_counts(file, player):
     return vector
 
 
-folder = "tests nnet vs old"
+folder = "nnet vs greedy"
 
-for v in range(1,len(versions)):
+for v in range(len(versions)):
     filename = os.path.join(folder, str(versions[v]) + ".pkl")
-    results[:, v-1] = get_counts(filename, 1)
+    results[:, v] = get_counts(filename, 1)
 
 print(results)
 
 x = np.array([x for x in range(1,len(versions)+1)])
-x = np.array([x for x in range(2,len(versions)+1)])
 for p in range(3):
     plt.plot(x, results[p,:], marker="o")
 

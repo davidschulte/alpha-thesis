@@ -7,6 +7,9 @@ class ForwardActor:
 
         valids = self.game.getValidMoves(board, player)
 
+        if valids[self.game.getActionSize()-1] == 1:
+            return valids
+
         probs = [0] * self.game.getActionSize()
 
         max_progress = -9
