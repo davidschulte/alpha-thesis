@@ -42,6 +42,7 @@ class MCTS():
         self.Visited = []
         # self.start_player = 0
         # self.max_depth = 0
+        self.wrong_predictions = [0, 0]
 
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
@@ -168,6 +169,7 @@ class MCTS():
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[(s, player)] = self.Ps[(s, player)] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[(s, player)])
+            self.wrong_predictions = [self.wrong_predictions[0] + 1, self.wrong_predictions[1] + 1 - sum_Ps_s]
             if sum_Ps_s > 0:
                 self.Ps[(s, player)] /= sum_Ps_s  # renormalize
             else:
@@ -253,3 +255,9 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
         self.C = {}
+
+    def get_wrong_prediction_rate(self):
+        wrong_sum = self.wrong_predictions[1]
+        counts = self.wrong_predictions[0]
+        self.wrong_predictions = [0, 0]
+        return wrong_sum / counts

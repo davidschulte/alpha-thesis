@@ -10,10 +10,10 @@ import numpy as np
 
 args = dotdict({
     'numMCTSSims': 2,
-    'cpuct': 150,
+    'cpuct': 15,
     'max_steps': 600,
 
-    'load_folder_file': ('checkpoint', 13),
+    'load_folder_file': ('checkpoint', 27),
 })
 
 args2 = dotdict({
@@ -36,11 +36,11 @@ mcts1 = MCTS(game, nn1, args)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(mcts1, forward, mcts1, game, gui, True)
+evaluator = Evaluator(None, mcts1, mcts1, game, gui, True)
 scores_all = np.zeros((3, 3))
 steps_all = 0
 wrong_win_all = 0
-for _ in range(50):
+for _ in range(20):
     scores, steps, wrong_win = evaluator.play_game(1, 1)
     for p in range(3):
         if scores[p] == 3:
@@ -52,3 +52,5 @@ for _ in range(50):
     steps_all += steps
     wrong_win_all += wrong_win
     print(scores_all)
+
+print(mcts1.get_wrong_prediction_rate())
