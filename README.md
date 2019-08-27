@@ -1,7 +1,6 @@
 # Alpha Thesis
 
 Used in thesis "Reinforcement Learning for 3-player Chinese Checkers"
-![alt tag](https://github.com/suragnair/alpha-zero-general/raw/master/pretrained_models/6x6.png)
 
 This project is based on the repository:
 https://github.com/suragnair/alpha-zero-general/
