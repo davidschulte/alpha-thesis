@@ -5,7 +5,7 @@ Used in thesis "Reinforcement Learning for 3-player Chinese Checkers"
 This project is based on the repository:
 https://github.com/suragnair/alpha-zero-general/
 
-Read the thesis [here](https://github.com/davidschulte/alpha-thesis/Thesis.pdf).
+Read the thesis [here](https://github.com/davidschulte/alpha-thesis/blob/master/Thesis.pdf).
 
 
 ### Contributors and Credits
