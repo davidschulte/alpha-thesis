@@ -3,7 +3,7 @@ class VeryGreedyActor:
     def __init__(self, game):
         self.game = game
 
-    def getActionProb(self, board, player):
+    def getActionProb(self, board, player, egal):
 
         probs = [0] * self.game.getActionSize()
 
