@@ -4,8 +4,8 @@ from matplotlib import pyplot as plt
 import os
 from pickle import Pickler
 
-versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27, 32, 34, 35, 37]
-versions_small = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27]
+versions_all = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27, 32, 34, 35, 37]
+versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27]
 
 results = np.zeros((3, len(versions)))
 
@@ -81,7 +81,7 @@ folder = "nnet vs greedy"
 
 for v in range(0,len(versions)):
     filename = os.path.join(folder, str(versions[v]) + ".pkl")
-    results[:, v] = get_counts_separate(filename, False)
+    results[:, v] = get_counts_separate(filename, True)
 
 print(results)
 
