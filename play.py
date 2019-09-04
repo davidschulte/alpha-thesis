@@ -25,18 +25,18 @@ args2 = dotdict({
 })
 game = ChineseCheckersGame()
 gui = GUI(1)
-# nn1 = nn(game)
-# nn1.load_first_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+nn1 = nn(game)
+nn1.load_first_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
 
 # nn2 = nn(game)
 # nn2.load_first_checkpoint(args2.load_folder_file[0], args2.load_folder_file[1])
 
-# mcts1 = MCTS(game, nn1, args)
+mcts1 = MCTS(game, nn1, args)
 # mcts2 = MCTS(game, nn2, args2)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(None, forward, forward, game, gui, True)
+evaluator = Evaluator(mcts1, mcts1, mcts1, game, gui, True)
 scores_all = np.zeros((3, 3))
 steps_all = 0
 wrong_win_all = 0

@@ -147,7 +147,7 @@ class GUI:
 
         self.old_board = board
 
-        pygame.time.wait(100)
+        pygame.time.wait(1500)
             # timer -= 1
 
     def draw_possibles(self, possible_board):
