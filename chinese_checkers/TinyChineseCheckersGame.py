@@ -197,8 +197,31 @@ class ChineseCheckersGame(Game):
     def get_next_player(self, player):
         return self.b.get_next_player(player)
 
-    def get_possible_board(self, y_start, x_start, board):
-        return self.b.get_possible_board(self, y_start, x_start, board)
 
     def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
         return self.b.get_action_by_coordinates(self, y_start, x_start, y_end, x_end)
+
+    def get_possible_board(self, y, x, board, player):
+        if player == 1:
+            player_revert = 1
+        elif player == 2:
+            player_revert = 3
+        else:
+            player_revert = 2
+
+        possible_board = np.zeros((9, 9))
+        canonical_board = self.getCanonicalForm(board, player)
+        y_start, x_start = self.b.get_canonical_coordinates(y, x, player)
+        reachables_direct = self.b.get_reachables_direct(y_start, x_start, canonical_board)
+        reachables_jumping = self.b.get_reachables_jump(y_start, x_start, canonical_board)
+        for (_, _, direction) in reachables_direct:
+            change_y, change_x = self.b.get_direction_pos(direction)
+            y_end, x_end = y_start + change_y, x_start + change_x
+            possible_board[y_end, x_end] = 1
+
+        for (y_end, x_end) in reachables_jumping:
+            possible_board[y_end, x_end] = 1
+
+        possible_board = self.getCanonicalForm(possible_board, player_revert)
+
+        return possible_board

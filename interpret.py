@@ -4,6 +4,25 @@ from matplotlib import pyplot as plt
 import os
 from pickle import Pickler
 
+def get_counts_player(file, games_played):
+    places = np.zeros((3, 3))
+    dataframe = pd.read_pickle(file)
+    array = dataframe.to_numpy()
+    for row in range(games_played):
+        for column in range(3):
+            if array[row, column+3] == 3:
+                places[column, 0] += 1
+            elif array[row, column+3] == 1:
+                places[column, 1] += 1
+            else:
+                places[column, 2] += 1
+    print(places)
+    sum_places = sum(places)
+    normalized = [x / sum_places for x in places]
+    print(normalized)
+
+    vector = np.transpose(normalized)
+    return vector
 
 def get_counts_all(file, games_played):
     places = [0] * 3
@@ -71,27 +90,29 @@ def get_counts_separate(file, alone, games_played):
     vector = np.transpose(normalized)
     return vector
 
-
+#
 versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27, 32, 34, 35, 37, 41]
+#
+# results_mcts_alone = np.zeros((3, len(versions)))
+# results_mcts_team = np.zeros((3, len(versions)))
+# results_nnet_alone = np.zeros((3, len(versions)))
+# results_nnet_team = np.zeros((3, len(versions)))
+#
+# folder_mcts = "mcts vs nnet"
+# folder_nnet = "nnet vs nnet"
+# games_played_mcts = 30
+# games_played_nnet = 120
+#
+# for v in range(len(versions)):
+#     filename = os.path.join(folder_nnet, str(versions[v]) + ".pkl")
+#     # results_mcts_alone[:, v] = get_counts_separate(filename, True, games_played_nnet)
+#     # results_mcts_team[:, v] = get_counts_separate(filename, False, games_played_nnet)
+#     #
+#     # filename = os.path.join(folder_nnet, str(versions[v]) + ".pkl")
+#     # results_nnet_alone[:, v] = get_counts_separate(filename, True, games_played_nnet)
+#     # results_nnet_team[:, v] = get_counts_separate(filename, False, games_played_nnet)
 
-results_mcts_alone = np.zeros((3, len(versions)))
-results_mcts_team = np.zeros((3, len(versions)))
-results_nnet_alone = np.zeros((3, len(versions)))
-results_nnet_team = np.zeros((3, len(versions)))
 
-folder_mcts = "mcts vs nnet"
-folder_nnet = "nnet vs greedy"
-games_played_mcts = 30
-games_played_nnet = 120
-
-for v in range(len(versions)):
-    filename = os.path.join(folder_nnet, str(versions[v]) + ".pkl")
-    results_mcts_alone[:, v] = get_counts_separate(filename, True, games_played_nnet)
-    results_mcts_team[:, v] = get_counts_separate(filename, False, games_played_nnet)
-    #
-    # filename = os.path.join(folder_nnet, str(versions[v]) + ".pkl")
-    # results_nnet_alone[:, v] = get_counts_separate(filename, True, games_played_nnet)
-    # results_nnet_team[:, v] = get_counts_separate(filename, False, games_played_nnet)
 
 
 x = np.array([x for x in range(1, len(versions)+1)])

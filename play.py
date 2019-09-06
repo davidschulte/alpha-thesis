@@ -9,7 +9,7 @@ from chinese_checkers.TinyGUI import GUI
 import numpy as np
 
 args = dotdict({
-    'numMCTSSims': 2,
+    'numMCTSSims': 200,
     'cpuct': 15,
     'max_steps': 600,
 
@@ -27,16 +27,16 @@ game = ChineseCheckersGame()
 gui = GUI(1)
 nn1 = nn(game)
 nn1.load_first_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+mcts1 = MCTS(game, nn1, args)
 
 # nn2 = nn(game)
 # nn2.load_first_checkpoint(args2.load_folder_file[0], args2.load_folder_file[1])
 
-mcts1 = MCTS(game, nn1, args)
 # mcts2 = MCTS(game, nn2, args2)
 actor = VeryGreedyActor(game)
 forward = ForwardActor(game)
 
-evaluator = Evaluator(mcts1, mcts1, mcts1, game, gui, True)
+evaluator = Evaluator(None, mcts1, mcts1, game, gui, True)
 scores_all = np.zeros((3, 3))
 steps_all = 0
 wrong_win_all = 0
@@ -53,4 +53,3 @@ for _ in range(20):
     wrong_win_all += wrong_win
     print(scores_all)
 
-print(mcts1.get_wrong_prediction_rate())

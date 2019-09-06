@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-from chinese_checkers.TinyChineseCheckersLogic import Board as logic
+from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame as Game
 MOVES = [[0, 1], [-1, 1], [1, -1], [1, 0]]
 DIM = 9
 Y_OFFSET = 17
@@ -56,7 +56,8 @@ class GUI:
         self.draw_areas(self.window)
         self.draw_lines(self.window)
         self.old_board = START
-        self.logic = logic()
+        self.game = Game()
+        self.logic = self.game.get_board()
 
         pygame.font.init()
         self.myfont = pygame.font.SysFont('Arial', 15)
@@ -112,7 +113,7 @@ class GUI:
 
             pygame.draw.polygon(surface, color, coordinates)
 
-    def draw_board(self, board, step):
+    def draw_board(self, board, step, wait):
         # timer = self.timer
         # while timer > 0:
         for event in pygame.event.get():
@@ -139,7 +140,7 @@ class GUI:
                     # draw_figure(window, y, x, 2, BLACK)
 
 
-        step_display = self.myfont.render("Step " + str(step), False, (0, 0, 0))
+        step_display = self.myfont.render("Player " + str(step), False, (0, 0, 0))
         pygame.draw.rect(self.window, WHITE, [10, 10, 50, 30])
         if step >= 0:
             self.window.blit(step_display, (10,10))
@@ -147,18 +148,19 @@ class GUI:
 
         self.old_board = board
 
-        pygame.time.wait(1500)
+        if wait:
+            pygame.time.wait(self.timer)
             # timer -= 1
 
     def draw_possibles(self, possible_board):
         for y in range(DIM):
             for x in range(DIM):
-                if possible_board[y, x] == 1:
+                if possible_board[y, x] in [1, 2, 3]:
                     self.draw_figure(self.window, y, x, R, BLACK)
                     self.draw_figure(self.window, y, x, R-2, PINK)
         pygame.display.update()
 
-    def get_action(self, board):
+    def get_action(self, board, player):
         selected = False
         possible_board = None
         start_y, start_x, end_y, end_x = -1, -1, -1, -1
@@ -170,22 +172,22 @@ class GUI:
                     y, x = self.pos_to_board_coordinates(pos)
                     if y != -1:
                         if selected:
-                            if possible_board[y, x] == 1:
+                            if possible_board[y, x] in [1, 2, 3]:
                                 end_y, end_x = y, x
-                                action = self.logic.get_action_by_coordinates(start_y, start_x, end_y, end_x)
+                                action = self.logic.get_action_by_coordinates(start_y, start_x, end_y, end_x, player)
                                 return action
                             else:
                                 selected = False
-                                self.draw_board(board, 0)
+                                self.draw_board(board, player, False)
 
                         else:
-                            if board[y, x] == 1:
+                            if board[y, x] == player:
                                 start_y, start_x = y, x
-                                possible_board = self.logic.get_possible_board(y, x, board)
+                                possible_board = self.game.get_possible_board(y, x, board, player)
                                 self.draw_possibles(possible_board)
                                 selected = True
 
     def snapshot(self, board, filename):
         self.old_board = board
-        self.draw_board(board, -1)
+        self.draw_board(board, -1, False)
         pygame.image.save(self.window, filename)

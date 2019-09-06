@@ -454,20 +454,9 @@ class Board():
     #
     #     return rotated_board
 
-    def get_possible_board(self, y_start, x_start, board):
-        possible_board = np.zeros((9,9))
-        reachables_direct = self.get_reachables_direct(y_start, x_start, board)
-        reachables_jumping = self.get_reachables_jump(y_start, x_start, board)
-        for (_, _, direction) in reachables_direct:
-            y_end, x_end = y_start + MOVES[direction][0], x_start + MOVES[direction][1]
-            possible_board[y_end, x_end] = 1
-
-        for (y_end, x_end) in reachables_jumping:
-            possible_board[y_end, x_end] = 1
-
-        return possible_board
-
-    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
+    def get_action_by_coordinates(self, y_start, x_start, y_end, x_end, player):
+        y_start, x_start = self.get_canonical_coordinates(y_start, x_start, player)
+        y_end, x_end = self.get_canonical_coordinates(y_end, x_end, player)
         if GRID[y_start, x_start] == GRID[y_end, x_end]:
             return self.encode_move_jumping(y_start, x_start, y_end, x_end)
         else:
@@ -475,3 +464,26 @@ class Board():
             for direction in range(6):
                 if MOVES[direction][0] == diff_y and MOVES[direction][1] == diff_x:
                     return self.encode_move_direct(y_start, x_start, direction)
+
+    def get_canonical_coordinates(self, y, x, player):
+        if player == 1:
+            return y, x
+        elif player == 2:
+            y_to_y = -1
+            x_to_y = -1
+            y_to_x = 1
+            x_to_x = 0
+        else:
+            y_to_y = 0
+            x_to_y = 1
+            y_to_x = -1
+            x_to_x = -1
+
+        y_dir = y - 4
+        x_dir = x - 4
+        new_y = 4 + y_to_y * y_dir + x_to_y * x_dir
+        new_x = 4 + y_to_x * y_dir + x_to_x * x_dir
+        return new_y, new_x
+
+    def get_direction_pos(self, direction):
+        return MOVES[direction][0], MOVES[direction][1]
