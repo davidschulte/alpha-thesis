@@ -1,43 +1,19 @@
 from collections import deque
 from Arena import Arena
 from ParallelMCTS import MCTS
-from MCTSTExperimental import MCTS as MCTSSingle
+from MCTS import MCTS as MCTSSingle
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
 import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
-import time
-import cProfile, pstats, io
 import gc
-from chinese_checkers.InitializeActor import VeryGreedyActor as Actor
-# from chinese_checkers.RandomActor import RandomActor as Actor
+from chinese_checkers.InitializeAgent import InitializeAgent
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
-# from chinese_checkers.GreedyActorExperimental import GreedyActor
-
-def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
-
-    def inner(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return inner
 
 
-class Coach():
-    """
-    This class executes the self-play + learning. It uses the functions defined
-    in Game and NeuralNet. args are specified in main.py.
-    """
+class Coach:
+
     def __init__(self, game, nnet, args):
         self.game = game
         self.nnet = nnet
@@ -57,9 +33,12 @@ class Coach():
         self.games = None
         self.mctss = None
 
-        self.greedy_actor = Actor(game)
+        self.initialize_agent = InitializeAgent(game)
 
     def initialize_parallel(self):
+        """
+        initializes instances before self-play phase
+        """
         self.all_train_examples = [[] for _ in range(self.args.parallel_block)]
         self.all_boards = [self.game.getInitBoard()] * self.args.parallel_block
         self.all_episode_steps = [1] * self.args.parallel_block
@@ -70,50 +49,43 @@ class Coach():
         self.mctss = [MCTS(self.games[i], self.nnet, self.args) for i in range(self.args.parallel_block)]
         gc.collect()
 
-    def execute_greedy_episode(self):
+    def execute_initialize_episode(self):
         """
-        This function executes a game of self-play where each player is played by the Initialize Actor.
-
-        Returns:
-            trainExamples: a list of examples of the form (canonicalBoard,pi,v)
-                           pi is the MCTS informed policy vector, v is +1 if
-                           the player eventually won the game, else -1.
+        executes a game played by the Initiliaze Agent
+        :return: train examples
         """
-        trainExamples = []
+        train_examples = []
         board = self.game.getInitBoard()
-        curPlayer = 1
-        episodeStep = 0
+        cur_player = 1
+        episode_step = 0
         scores = [0, 0, 0]
-        self.game.reset_board()
+        self.game.reset_logic()
 
-        while np.count_nonzero(scores) < 2 and episodeStep < self.args.max_steps:
+        while np.count_nonzero(scores) < 2 and episode_step < self.args.max_steps:
 
-            if scores[curPlayer - 1] == 0:
-                episodeStep += 1
-                canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                pi = self.greedy_actor.getActionProb(canonicalBoard, 1)
-                # pi = self.greedy_actor.getActionProb(canonicalBoard)
-
-                trainExamples.append([canonicalBoard, curPlayer, pi, None])
+            if scores[cur_player - 1] == 0:
+                episode_step += 1
+                canonical_board = self.game.getCanonicalForm(board, cur_player)
+                pi = self.initialize_agent.get_action_prob(canonical_board, 1)
+                train_examples.append([canonical_board, cur_player, pi, None])
                 action = np.random.choice(len(pi), p=pi)
             else:
                 action = self.game.getActionSize() - 1
 
-            board, curPlayer = self.game.getNextState(board, curPlayer, action)
+            board, cur_player = self.game.getNextState(board, cur_player, action)
 
             scores = self.game.getGameEnded(board, False)
 
-        #     if episodeStep % 100 == 0:
-        #         print(episodeStep)
-        #         print(board)
-        #
-        # print(board)
         scores_player_two = np.array([scores[1], scores[2], scores[0]])
         scores_player_three = np.array([scores[2], scores[0], scores[1]])
         scores_all = [scores, scores_player_two, scores_player_three]
-        return [(x[0], x[2], scores_all[x[1]-1]) for x in trainExamples]
+        return [(x[0], x[2], scores_all[x[1]-1]) for x in train_examples]
 
     def execute_episodes(self):
+        """
+        executes several games played by the Main Agent
+        :return: train examples
+        """
         self.initialize_parallel()
         it = 1
         start_time = time.time()
@@ -143,27 +115,13 @@ class Coach():
                 print(str(int(it/self.args.numMCTSSims)) + " steps: " + str(int(end_time-start_time)) + "s")
                 start_time = end_time
             it += 1
-            # self.one_iter()
-            # print(self.all_episode_steps)
-
         return self.compile_train_examples()
 
-
-    def one_iter(self):
-        requests = self.get_requests()
-
-        update_indices = []
-        valid_requests = []
-
-        for i in range(self.args.parallel_block):
-            if requests[i] is not None:
-                update_indices.append(i)
-                valid_requests.append(requests[i])
-
-        pis, vs = self.nnet.predict_parallel(valid_requests)
-        self.update_predictions(pis, vs, update_indices)
-
     def get_requests(self):
+        """
+        collects states whose predictions are requested
+        :return: list of states
+        """
         all_request_states = [None] * self.args.parallel_block
         for n in range(self.args.parallel_block):
             if not self.all_done[n]:
@@ -174,8 +132,6 @@ class Coach():
                     mcts = self.mctss[n]
                     board = self.all_boards[n]
                     cur_player = self.all_cur_players[n]
-                    # mcts.search(board, cur_player, 0)
-                    # mcts.add_iter()
                     if mcts.get_done():
                         s = self.game.stringRepresentation(board)
                         mcts.Visited.append(s)
@@ -207,12 +163,22 @@ class Coach():
         return all_request_states
 
     def update_predictions(self, pis, vs, update_indices):
+        """
+        updates the values inside the tree searches
+        :param pis: predicted pi values
+        :param vs: predicted v values
+        :param update_indices: indices corresponding to the tree search instances
+        """
         for i in range(len(update_indices)):
             index = update_indices[i]
             mcts = self.mctss[index]
             mcts.update_predictions(pis[i,:], vs[i,:])
 
     def compile_train_examples(self):
+        """
+        compiles the train examples through usage of r_v(v,p)
+        :return: train examples
+        """
         train_examples = []
         for n in range(self.args.parallel_block):
             single_examples = self.all_train_examples[n]
@@ -227,11 +193,8 @@ class Coach():
 
     def learn(self):
         """
-        Performs numIters iterations with numEps episodes of self-play in each
-        iteration. After every iteration, it retrains neural network with
-        examples in trainExamples (which has a maximium length of maxlenofQueue).
-        It then pits the new neural network against the old one and accepts it
-        only if it wins >= updateThreshold fraction of games.
+        main loop of the training loop
+
         """
         if self.args.load_model:
             start = self.args.load_example[1] + 1
@@ -244,7 +207,7 @@ class Coach():
             greedy = i == 1 and not self.args.load_model
 
             if not self.skipFirstSelfPlay or i>1:
-                iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
+                iteration_train_examples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 num_eps = self.args.numEps
                 if greedy:
@@ -255,9 +218,9 @@ class Coach():
 
                 for eps in range(num_eps):
                     if greedy:
-                        iterationTrainExamples += self.execute_greedy_episode()
+                        iteration_train_examples += self.execute_initialize_episode()
                     else:
-                        iterationTrainExamples += self.execute_episodes()
+                        iteration_train_examples += self.execute_episodes()
 
                     # bookkeeping + plot progress
                     eps_time.update(time.time() - end)
@@ -269,7 +232,7 @@ class Coach():
 
                 # save the iteration examples to the history
                 if not greedy:
-                    self.trainExamplesHistory.append(iterationTrainExamples)
+                    self.trainExamplesHistory.append(iteration_train_examples)
                 
                     if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                         print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
@@ -285,7 +248,7 @@ class Coach():
                     shuffle(trainExamples)
 
                 else:
-                    trainExamples = iterationTrainExamples
+                    trainExamples = iteration_train_examples
 
             # training new network, keeping a copy of the old one
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.h5')
@@ -336,7 +299,5 @@ class Coach():
             with open(examplesFile, "rb") as f:
                 self.trainExamplesHistory = Unpickler(f).load()
             f.closed
-            # examples based on the model were already collected (loaded)
-            # self.skipFirstSelfPlay = True
 
 

@@ -27,7 +27,7 @@ class Evaluator:
         # curPlayer = 2
         iter_step = 1
         scores = [0, 0, 0]
-        self.game.reset_board()
+        self.game.reset_logic()
         if self.show:
             self.gui.draw_board(board, curPlayer, False)
 
@@ -38,7 +38,7 @@ class Evaluator:
                     a = self.gui.get_action(board, curPlayer)
                 else:
                     if iter_step >= random_start:
-                        pi = self.players[curPlayer-1].getActionProb(board, curPlayer, iter_step >= best_start)
+                        pi = self.players[curPlayer-1].get_action_prob(board, curPlayer, iter_step >= best_start)
                     else:
                         sum_valids = sum(valids)
                         pi = [x / float(sum_valids) for x in valids]

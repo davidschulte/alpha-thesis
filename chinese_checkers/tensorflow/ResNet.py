@@ -77,6 +77,11 @@ class NNetWrapper:
         self.model.fit(np.array(boards), [np.array(pis), np.array(vs)], epochs=self.epochs, batch_size=self.batch_size)
 
     def predict(self, board):
+        """
+        predicts v and pi for one board state
+        :param board: current board
+        :return: predicitons
+        """
         board = board[np.newaxis, :, :]
         board = board.astype('float32')
         [pi, v] = self.model.predict(board)
@@ -85,9 +90,13 @@ class NNetWrapper:
         return pi, v
 
     def predict_parallel(self, boards):
+        """
+        predicsts pis and vs for several board states
+        :param boards: several board states combined in a list
+        :return: predicitons
+        """
         boards = tf.convert_to_tensor(boards, np.float32)
         return self.model.predict(boards)
-
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
@@ -100,16 +109,20 @@ class NNetWrapper:
         self.model.save(filepath)
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
+        """
+        loads the model from a file
+        :param folder:
+        :param filename:
+        """
         filepath = os.path.join(folder, filename)
-        # if not os.path.exists(filepath+'.meta'):
-        #     raise("No model in path {}".format(filepath))
         self.model = keras.models.load_model(filepath)
 
     def load_first_checkpoint(self, folder, iteration):
+        """
+        loads model from a file, only used when loading a model at the start of the program
+        :param folder:          source folder
+        :param iteration:       iteration number from model
+        """
         filename = "checkpoint_" + str(iteration) + ".h5"
         filepath = os.path.join(folder, filename)
-        # if not os.path.exists(filepath+'.meta'):
-        #     raise("No model in path {}".format(filepath))
         self.model = keras.models.load_model(filepath)
-        # print(self.model.summary())
-        # keras.utils.plot_model(self.model, to_file='model.png')

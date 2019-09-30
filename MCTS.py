@@ -1,148 +1,143 @@
 import math
 import numpy as np
+
 EPS = 1e-8
 DEPTHMAX = 30
 
-class MCTS():
+
+class MCTS:
     """
-    This class handles the MCTS tree.
+    Monte-Carlo tree search
     """
 
     def __init__(self, game, nnet, args):
         self.game = game
         self.nnet = nnet
         self.args = args
-        self.Qsa = {}       # stores Q values for s,a (as defined in the paper)
-        self.Nsa = {}       # stores #times edge s,a was visited
-        self.Ns = {}        # stores #times board s was visited
-        self.Ps = {}        # stores initial policy (returned by neural net)
-        # self.C = {}
+        self.Qsa = {}  # stores Q values for s,a (as defined in the paper)
+        self.Nsa = {}  # stores #times edge s,a was visited
+        self.Ns = {}  # stores #times board s was visited
+        self.Ps = {}  # stores initial policy (returned by neural net)
+        self.Loop = {}
+        self.Visited = []
+        self.wrong_predictions = [0, 0]
 
-        self.Es = {}        # stores game.getGameEnded ended for board s
-        self.Vs = {}        # stores game.getValidMoves for board s
+        self.Es = {}  # stores game.getGameEnded ended for board s
+        self.Vs = {}  # stores game.getValidMoves for board s
 
-    def getActionProb(self, canonicalBoard, temp=1):
+    def get_action_prob(self, board, player, best=False):
         """
-        This function performs numMCTSSims simulations of MCTS starting from
-        canonicalBoard.
-
-        Returns:
-            probs: a policy vector where the probability of the ith action is
-                   proportional to Nsa[(s,a)]**(1./temp)
+        the main function of the tree search
+        :param board:   current board
+        :param player:  current player
+        :param best:    boolean that denotes if best selection or varied selection is used
+        :return:        probability vector
         """
+        self.reset()
+
+        s = self.game.stringRepresentation(board)
+
         for i in range(self.args.numMCTSSims):
-            self.search(canonicalBoard, 0)
+            self.search(board, player, 0)
 
-        s = self.game.stringRepresentation(canonicalBoard)
-        counts = [self.Nsa[(s,a)] if (s,a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
-        # test = sum(counts)
+        counts = [self.Nsa[(s, a, player)] if (s, a, player) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
-        if temp==0:
+        if best:
             bestA = np.argmax(counts)
-            probs = [0]*len(counts)
-            probs[bestA]=1
+            probs = [0] * len(counts)
+            probs[bestA] = 1
             return probs
 
-        # counts = [x**(1./temp) for x in counts]
-        test = sum(counts)
-        if test == 0:
-            print("ERROR")
-            print(canonicalBoard)
-            print(self.Nsa)
+        sum_counts = sum(counts)
+        if sum_counts == 0:
+            print(board)
+            print("Random Move by " + str(player) + "!")
+            counts = self.game.getValidMoves(board, player)
+            sum_counts = sum(counts)
 
-        probs = [x/float(sum(counts)) for x in counts]
-        # test = sum(probs)
+        probs = [x / float(sum_counts) for x in counts]
         return probs
 
-
-    def search(self, canonicalBoard, depth):
+    def search(self, board, player, depth):
         """
-        This function performs one iteration of MCTS. It is recursively called
-        till a leaf node is found. The action chosen at each node is one that
-        has the maximum upper confidence bound as in the paper.
-
-        Once a leaf node is found, the neural network is called to return an
-        initial policy P and a value v for the state. This value is propogated
-        up the search path. In case the leaf node is a terminal state, the
-        outcome is propogated up the search path. The values of Ns, Nsa, Qsa are
-        updated.
-
-        NOTE: the return values are the negative of the value of the current
-        state. This is done since v is in [-1,1] and if v is the value of a
-        state for the current player, then its value is -v for the other player.
-
-        Returns:
-            v: the negative of the value of the current canonicalBoard
+        recursive search function
+        one search iteration expands the tree by a leaf node, except when a loop-cut is executed
+        and updates tree values
+        :param board:   current board
+        :param player:  current player
+        :param depth:   current depth
+        :return:        scores that get propagated by the recursioun
         """
+        s = self.game.stringRepresentation(board)
 
-        s = self.game.stringRepresentation(canonicalBoard)
+        scores = self.game.getGameEnded(board, True).astype('float16')
 
-        scores = self.game.getGameEnded(canonicalBoard, True).astype('float16')
-
-        # if s in self.C and scores[0] == 0:
-        #     if self.C[s] >= 3:
-        #         scores[scores == 0] = 1
-        #         scores[2] = 0
-        #         print("LOOP")
-        #         print(canonicalBoard)
-        #         return np.array([scores[2], scores[0], scores[1]])
+        canonical_board = self.game.getCanonicalForm(board, player)
 
         if s not in self.Es:
             self.Es[s] = np.copy(scores)
-        if np.count_nonzero(self.Es[s]) == 2:
+        if np.count_nonzero(self.Es[s]) > 1:
             # terminal node
-            return np.array([scores[2], scores[0], scores[1]])
+            return scores
 
-        if s not in self.Ps or depth > DEPTHMAX:
+        if depth == 0:
+            self.Loop = [(s, player)]
+        else:
+            if s in self.Visited:
+                # print("VISITED")
+                return scores
+            if (s, player) in self.Loop:
+                print("Prevented Loop! Depth: " + str(depth))
+                return scores
+            else:
+                self.Loop.append((s, player))
+
+        if (s, player) not in self.Ps or depth > DEPTHMAX:
             if depth > DEPTHMAX:
+
                 print("CUT LEAF")
             # leaf node
-            self.Ps[s], scores_nn = self.nnet.predict(canonicalBoard)
-            valids = self.game.getValidMoves(canonicalBoard, 1)
-            self.Ps[s] = self.Ps[s]*valids      # masking invalid moves
-            sum_Ps_s = np.sum(self.Ps[s])
+            self.Ps[(s, player)], scores_nn = self.nnet.predict(canonical_board)
+            if player == 2:
+                scores_nn = np.array([scores_nn[2], scores_nn[0], scores_nn[1]])
+            elif player == 3:
+                scores_nn = np.array([scores_nn[1], scores_nn[2], scores_nn[0]])
+            valids = self.game.getValidMoves(canonical_board, 1)
+            self.Ps[(s, player)] = self.Ps[(s, player)] * valids  # masking invalid moves
+            sum_Ps_s = np.sum(self.Ps[(s, player)])
+            self.wrong_predictions = [self.wrong_predictions[0] + 1, self.wrong_predictions[1] + 1 - sum_Ps_s]
             if sum_Ps_s > 0:
-                self.Ps[s] /= sum_Ps_s    # renormalize
+                self.Ps[(s, player)] /= sum_Ps_s  # renormalize
             else:
                 # if all valid moves were masked make all valid moves equally probable
-                
-                # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
-                # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.   
-                print("All valid moves were masked, do workaround.")
-                self.Ps[s] = self.Ps[s] + valids
-                self.Ps[s] /= np.sum(self.Ps[s])
 
-            self.Vs[s] = valids
-            self.Ns[s] = 0
+                # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
+                # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
+                print("All valid moves were masked, do workaround.")
+                self.Ps[(s, player)] = self.Ps[(s, player)] + valids
+                self.Ps[(s, player)] /= np.sum(self.Ps[(s, player)])
+
+            self.Vs[(s, player)] = valids
+            self.Ns[(s, player)] = 0
 
             for i in range(3):
                 if scores[i] == 0:
                     scores[i] = scores_nn[i]
 
-            return np.array([scores[2], scores[0], scores[1]])
+            return scores
 
-        valids = self.Vs[s]
+        valids = self.Vs[(s, player)]
         cur_best = -float('inf')
         best_act = -1
 
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
             if valids[a]:
-                if (s,a) in self.Qsa:
-                    qsa = self.Qsa[(s,a)]
-                    pssa = self.Ps[s][a]
-                    ns = self.Ns[s]
-                    nsa = self.Nsa[(s,a)]
-                    exploitation = self.Qsa[(s,a)]
-                    exploration = self.Ps[s][a]*math.sqrt(self.Ns[s])/(1+self.Nsa[(s,a)])
-                    u = self.Qsa[(s,a)] + self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s])/(1+self.Nsa[(s,a)])
-                    u = u
+                if (s, a, player) in self.Qsa:
+                    u = self.Qsa[(s, a, player)] + self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[s, player]) / (
+                                1 + self.Nsa[(s, a, player)])
                 else:
-                    pssa = self.Ps[s][a]
-                    nsa = self.Ns[s]
-                    exploitation = 0
-                    exploration = self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)
-                    u = self.args.cpuct*self.Ps[s][a]*math.sqrt(self.Ns[s] + EPS)     # Q = 0 ?
+                    u = self.args.cpuct * self.Ps[(s, player)][a] * math.sqrt(self.Ns[(s, player)] + EPS)  # Q = 0 ?
                     u = u
 
                 if u > cur_best:
@@ -150,24 +145,26 @@ class MCTS():
                     best_act = a
 
         a = best_act
-        next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
-        next_s = self.game.getCanonicalForm(next_s, next_player)
+        next_s, next_player = self.game.getNextState(board, player, a)
 
-        scores = self.search(next_s, depth+1)
+        scores = self.search(next_s, next_player, depth + 1)
 
-        if (s,a) in self.Qsa:
-            self.Qsa[(s,a)] = (self.Nsa[(s,a)]*self.Qsa[(s,a)] + scores[0])/(self.Nsa[(s,a)]+1)
-            self.Nsa[(s,a)] += 1
+        if (s, a, player) in self.Qsa:
+            self.Qsa[(s, a, player)] = (self.Nsa[(s, a, player)] * self.Qsa[(s, a, player)] + scores[player-1]) / (self.Nsa[(s, a, player)] + 1)
+            self.Nsa[(s, a, player)] += 1
 
         else:
-            self.Qsa[(s,a)] = scores[0]
-            self.Nsa[(s,a)] = 1
+            self.Qsa[(s, a, player)] = scores[player-1]
+            self.Nsa[(s, a, player)] = 1
 
-        self.Ns[s] += 1
+        self.Ns[(s, player)] += 1
 
-        return np.array([scores[2], scores[0], scores[1]])
+        return scores
 
     def reset(self):
+        """
+        resets tree
+        """
         self.Qsa = {}  # stores Q values for s,a (as defined in the paper)
         self.Nsa = {}  # stores #times edge s,a was visited
         self.Ns = {}  # stores #times board s was visited
@@ -175,4 +172,12 @@ class MCTS():
 
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
-        self.C = {}
+
+    def get_wrong_prediction_rate(self):
+        """
+        :return:    average pre-evaluation scores assigned to illegal moves
+        """
+        wrong_sum = self.wrong_predictions[1]
+        counts = self.wrong_predictions[0]
+        self.wrong_predictions = [0, 0]
+        return wrong_sum / counts

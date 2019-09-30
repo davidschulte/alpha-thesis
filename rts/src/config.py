@@ -474,7 +474,7 @@ class Configuration:
                 n1.load_checkpoint('.\\..\\temp\\', player_model_file)
                 args1 = dotdict(player_config or {'numMCTSSims': 2, 'cpuct': 1.0})
                 mcts1 = MCTS(g, n1, args1)
-                self.play = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
+                self.play = lambda x: np.argmax(mcts1.get_action_prob(x, temp=0))
 
     class _LearnArgs:
         def __init__(self,

@@ -1,10 +1,15 @@
-class VeryGreedyActor:
+class InitializeAgent:
 
     def __init__(self, game):
         self.game = game
 
-    def getActionProb(self, board, player, egal):
-
+    def get_action_prob(self, board, player, best):
+        """
+        :param board:   current board
+        :param player:  current player
+        :param best:    best selection, does not matter because varied selection is always used
+        :return:        action probability vector
+        """
         probs = [0] * self.game.getActionSize()
 
         valids = self.game.getValidMoves(board, player)

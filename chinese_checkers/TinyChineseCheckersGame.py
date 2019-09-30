@@ -1,68 +1,34 @@
 from Game import Game
-from .TinyChineseCheckersLogic import Board
+from .TinyChineseCheckersLogic import Logic
 import numpy as np
-import cProfile, pstats, io
-
-def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
-
-    def inner(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return inner
 
 
 class ChineseCheckersGame(Game):
 
     def __init__(self):
         Game.__init__(self)
-        self.b = Board()
+        self.b = Logic()
 
     def getInitBoard(self):
         """
-        Returns:
-            startBo
-            ard: a representation of the board (ideally this is the form
-                        that will be the input to your neural network)
+        :return: start board
         """
         return self.b.get_start()
 
     def getBoardSize(self):
-        """
-        Returns:
-            (x,y): a tuple of board dimensions
-        """
         return 9, 9
 
     def getActionSize(self):
-        """
-        Returns:
-            actionSize: number of all possible actions
-        """
         return 25*6+9*9+2*6*6+4*4+1
 
     def getNextState(self, board, player, action):
         """
-        Input:
-            board: current board
-            player: current player (1 or -1)
-            action: action taken by current player
-
-        Returns:
-            nextBoard: board after applying action
-            nextPlayer: player who plays in the next turn (should be -player)
+        executes a move
+        :param board:   current board
+        :param player:  current player
+        :param action:  action taken
+        :return:        the board after the move and the next player
         """
-        # if player takes action on board, return next (board,player)
-        # action must be a valid move
         next_board = np.copy(board)
 
         if action == self.getActionSize() - 1:
@@ -81,14 +47,9 @@ class ChineseCheckersGame(Game):
 
     def getValidMoves(self, board, player):
         """
-        Input:
-            board: current board
-            player: current player
-
-        Returns:
-            validMoves: a binary vector of length self.getActionSize(), 1 for
-                        moves that are valid from the current board and player,
-                        0 for invalid moves
+        :param board:   current board
+        :param player:  current player
+        :return:        a binary vector, where an entry 1 corresponds to a legal move and 0 to an illegal move
         """
         valids = [0]*self.getActionSize()
         if self.b.get_done(board, player, True):
@@ -108,17 +69,12 @@ class ChineseCheckersGame(Game):
             valids[-1] = 1
         return valids
 
-
     def getGameEnded(self, board, temporary):
         """
-        Input:
-            board: current board
-            player: current player (1 or -1)
-
-        Returns:
-            r: 0 if game has not ended. 1 if player won, -1 if player lost,
-               small non-zero value for draw.
-
+        :param board:       current board
+        :param temporary:   True if used inside the tree search simulations
+                            False if used outside the tree search
+        :return:            boolean that denotes if the game is over
         """
         scores = self.b.get_win_state(board, temporary)
 
@@ -126,26 +82,10 @@ class ChineseCheckersGame(Game):
 
     def getCanonicalForm(self, board, player):
         """
-        Input:
-            board: current board
-            player: current player (1 or -1)
-
-        Returns:
-            canonicalBoard: returns canonical form of board. The canonical form
-                            should be independent of player. For e.g. in chess,
-                            the canonical form can be chosen to be from the pov
-                            of white. When the player is white, we can return
-                            board as is. When the player is black, we can invert
-                            the colors and return the board.
+        :param board:   current board
+        :param player:  current player
+        :return:        the rotated board r_s(s,p)
         """
-        # b = Board()
-        # canonical_board = b.encode_board(board)
-        # old_board = np.copy(canonical_board)
-        # shift = player - 1
-        # for p in [1,2,3]:
-        #     canonical_board[old_board == p] = (p + shift) % 3
-        #
-        # return canonical_board
         if player == 1:
             return board
 
@@ -156,40 +96,21 @@ class ChineseCheckersGame(Game):
         else:
             new_players = [2, 3, 1]
 
-
         for p in range(len(players)):
             rotation_board[board == players[p]] = new_players[p]
 
         return self.b.rotate_board(rotation_board, 1, player)
 
-
-
-    def getSymmetries(self, board, pi):
-        """
-        Input:
-            board: current board
-            pi: policy vector of size self.getActionSize()
-
-        Returns:
-            symmForms: a list of [(board,pi)] where each tuple is a symmetrical
-                       form of the board and the corresponding pi vector. This
-                       is used when training the neural network from examples.
-        """
-        return [(board, pi)]
-
     def stringRepresentation(self, board):
         """
-        Input:
-            board: current board
-
-        Returns:
-            boardString: a quick conversion of board to a string format.
-                         Required by MCTS for hashing.
+        converts the board representation to a string, needed to work as a dictionary key in python
+        :param board:   current board
+        :return:        string representation of the board
         """
         return board.tostring()
 
-    def reset_board(self):
-        self.b = Board()
+    def reset_logic(self):
+        self.b = Logic()
 
     def get_board(self):
         return self.b
@@ -197,11 +118,18 @@ class ChineseCheckersGame(Game):
     def get_next_player(self, player):
         return self.b.get_next_player(player)
 
-
     def get_action_by_coordinates(self, y_start, x_start, y_end, x_end):
         return self.b.get_action_by_coordinates(self, y_start, x_start, y_end, x_end)
 
     def get_possible_board(self, y, x, board, player):
+        """
+        :param y:       y position of piece
+        :param x:       x position of piece
+        :param board:   current board
+        :param player:  player
+        :return:        board that has positive entries where the specified piece can be moved to
+        """
+
         if player == 1:
             player_revert = 1
         elif player == 2:

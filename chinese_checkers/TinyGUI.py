@@ -63,16 +63,31 @@ class GUI:
         self.myfont = pygame.font.SysFont('Arial', 15)
 
     def draw_figure(self, surface, row, column, radius, color):
+        """
+        draws piece on board
+        :param surface: surface to draw on
+        :param row:     row of piece
+        :param column:  columns of piece
+        :param radius:  radius of circle in drawing
+        :param color:   color of piece
+        """
         y = Y_OFFSET + row * Y_STEP
         x = X_OFFSET + column * X_STEP + (row - 6) * X_STEP / 2
         pygame.draw.circle(surface, color, (int(x),int(y)), radius)
 
     def coordinates_to_pos(self, row, column):
+        """
+        converts rows and columns to coordinates in the frame
+        """
         y = Y_OFFSET + row * Y_STEP
         x = X_OFFSET + column * X_STEP + (row - 6) * X_STEP / 2
         return y, x
 
     def pos_to_board_coordinates(self, pos):
+        """
+        converts coordinates to row and column
+        if the coordinates do not belong to the board, -1,-1 is returned
+        """
         (pos_x, pos_y) = pos
         for row in range(DIM):
             for column in range(DIM):
@@ -86,6 +101,10 @@ class GUI:
         pygame.draw.line(surface,color, (x1, y1), (x2, y2), line_width)
 
     def draw_lines(self, surface):
+        """
+        draws connection lines between fields
+        """
+
         for row in range(DIM):
             for column in range(DIM):
                 for m in range(4):
@@ -97,6 +116,9 @@ class GUI:
                             self.draw_line(surface, y1_pos, x1_pos, y2_pos, x2_pos, BLACK)
 
     def draw_areas(self, surface):
+        """
+        colors the areas of the board
+        """
         for area in range(6):
             color = GREEN
             if area < 4:
@@ -113,12 +135,15 @@ class GUI:
 
             pygame.draw.polygon(surface, color, coordinates)
 
-    def draw_board(self, board, step, wait):
-        # timer = self.timer
-        # while timer > 0:
+    def draw_board(self, board, current_player, wait):
+        """
+        draws board
+        :param board:           current board
+        :param current_player:  current player
+        :param wait:            boolean that denotes if there should be a pause between displays
+        """
         for event in pygame.event.get():
             pass
-        # window.blit(bg, (40, 0))
 
         for y in range(DIM):
             for x in range(DIM):
@@ -139,10 +164,9 @@ class GUI:
                     self.draw_figure(self.window, y, x, R-2, color)
                     # draw_figure(window, y, x, 2, BLACK)
 
-
-        step_display = self.myfont.render("Player " + str(step), False, (0, 0, 0))
+        step_display = self.myfont.render("Player " + str(current_player), False, (0, 0, 0))
         pygame.draw.rect(self.window, WHITE, [10, 10, 50, 30])
-        if step >= 0:
+        if current_player >= 0:
             self.window.blit(step_display, (10,10))
         pygame.display.update()
 
@@ -153,6 +177,9 @@ class GUI:
             # timer -= 1
 
     def draw_possibles(self, possible_board):
+        """
+        draws possible fields to move, when a piece was selected
+        """
         for y in range(DIM):
             for x in range(DIM):
                 if possible_board[y, x] in [1, 2, 3]:
@@ -161,6 +188,11 @@ class GUI:
         pygame.display.update()
 
     def get_action(self, board, player):
+        """
+        :param board: board
+        :param player: current player
+        :return: returns action, after a human player chose it
+        """
         selected = False
         possible_board = None
         start_y, start_x, end_y, end_x = -1, -1, -1, -1
@@ -188,6 +220,9 @@ class GUI:
                                 selected = True
 
     def snapshot(self, board, filename):
+        """
+        saves a screenshot of the game
+        """
         self.old_board = board
         self.draw_board(board, -1, False)
         pygame.image.save(self.window, filename)

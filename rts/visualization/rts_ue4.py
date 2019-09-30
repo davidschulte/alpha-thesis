@@ -91,7 +91,7 @@ class TD2020LearnAPI(TFPluginAPI):
                 self.g.setInitBoard(self.initial_board_config)
                 b = self.g.getInitBoard()
 
-                def n1p(board): return np.argmax(self.mcts.getActionProb(board, temp=0))
+                def n1p(board): return np.argmax(self.mcts.get_action_prob(board, temp=0))
 
                 canonical_board = self.g.getCanonicalForm(b, self.owning_player)
 

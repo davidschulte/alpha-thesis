@@ -1,32 +1,13 @@
 import math
 import numpy as np
-import cProfile, pstats, io
-
-def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
-
-    def inner(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return inner
-
 
 EPS = 1e-8
 DEPTHMAX = 30
 
 
-class MCTS():
+class MCTS:
     """
-    This class handles the MCTS tree.
+    iterative version of the Monte-Carlo tree search
     """
 
     def __init__(self, game, nnet, args):
@@ -47,6 +28,14 @@ class MCTS():
         self.trace = []
 
     def search(self, board, player, depth):
+        """
+        expands the tree by one leaf node
+        :param board:   current board
+        :param player:  current player
+        :param depth:   current depth inside the tree
+        :return:        None, if no prediction is needed,
+                        a board state, if its prediction is needed
+        """
         while True:
             s = self.game.stringRepresentation(board)
             scores = self.game.getGameEnded(board, True).astype('float16')
@@ -56,7 +45,6 @@ class MCTS():
             if np.count_nonzero(self.Es[s]) > 1:
                 # terminal node
                 self.back_propagate(self.Es[s])
-                # print("GAME OVER")
                 return None
 
             if depth == 0:
@@ -74,14 +62,12 @@ class MCTS():
                     self.Loop.append((s, player))
 
             if (s, player) not in self.Ps:
-                canonicalBoard = self.game.getCanonicalForm(board, player)
-                valids = self.game.getValidMoves(canonicalBoard, 1)
+                canonical_board = self.game.getCanonicalForm(board, player)
+                valids = self.game.getValidMoves(canonical_board, 1)
                 self.Vs[(s, player)] = valids
                 self.trace.append([s, player])
 
-                return canonicalBoard
-                # self.Ps[(s, player)], scores_nn = self.nnet.predict(canonicalBoard, player)
-                # return scores
+                return canonical_board
 
             valids = self.Vs[(s, player)]
             cur_best = -float('inf')
@@ -102,31 +88,15 @@ class MCTS():
 
             a = best_act
 
-            if a < 0:
-                print(a)
-                print(valids)
-                print(board)
-                print(player)
-                print(depth)
-
             self.trace.append([s, a, player])
-            # if (s, a, player) in self.B:
-            #     board = self.B[(s, a, player)]
-            #     player = self.game.get_next_player(player)
-            # else:
-            #     board, next_player = self.game.getNextState(board, player, a)
-            #     self.B[(s, a, player)] = board
-            #     player = next_player
 
             board, player = self.game.getNextState(board, player, a)
             depth += 1
 
-
-
-    # def back_propagate(self):
-
-
     def reset(self):
+        """
+        resets the tree
+        """
         self.Qsa = {}  # stores Q values for s,a (as defined in the paper)
         self.Nsa = {}  # stores #times edge s,a was visited
         self.Ns = {}  # stores #times board s was visited
@@ -138,6 +108,12 @@ class MCTS():
         self.B = {}
 
     def get_counts(self, board, player):
+        """
+        main function of the tree search
+        :param board: current board
+        :param player: current player
+        :return: probability vector C
+        """
         if self.iter < self.args.numMCTSSims:
             return None
         s = self.game.stringRepresentation(board)
@@ -159,6 +135,11 @@ class MCTS():
         return self.iter == self.args.numMCTSSims
 
     def update_predictions(self, pi, v):
+        """
+        updates values inside the tree after prediction by the neural network is received and back-propagates them
+        :param pi:  predicted pi
+        :param v:   predicted v
+        """
         s, player = self.trace.pop()
         self.Ps[(s, player)] = pi
 
@@ -187,6 +168,10 @@ class MCTS():
         self.back_propagate(scores)
 
     def back_propagate(self, scores):
+        """
+        back-propagates score through the path that is saved in the list self.trace
+        :param scores: scores that gets back-propagated
+        """
         self.iter += 1
         while self.trace:
             s, a, player = self.trace.pop()

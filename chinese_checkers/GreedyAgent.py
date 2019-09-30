@@ -1,9 +1,15 @@
-class ForwardActor:
+class GreedyAgent:
 
     def __init__(self, game):
         self.game = game
 
-    def getActionProb(self, board, player, egal):
+    def get_action_prob(self, board, player, best):
+        """
+        :param board:   current board
+        :param player:  current player
+        :param best:    best selection: does not matter, because best selection is always used
+        :return:        action probability vector
+        """
 
         valids = self.game.getValidMoves(board, player)
 

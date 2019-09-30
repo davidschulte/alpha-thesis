@@ -2,12 +2,11 @@ from utils import *
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 from chinese_checkers.tensorflow.ResNet import NNetWrapper as nn
 from EvalArena import Arena
-from MCTSTExperimental import MCTS
+from MCTS import MCTS
 import os
-from chinese_checkers.ForwardActor import ForwardActor
+from chinese_checkers.GreedyAgent import GreedyAgent
 from pickle import Pickler
-from chinese_checkers.InitializeActor import VeryGreedyActor
-from chinese_checkers.ForwardActor import ForwardActor
+from chinese_checkers.InitializeAgent import InitializeAgent
 
 import numpy as np
 
@@ -28,8 +27,8 @@ versions_small = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27]
 versions = [1, 2, 3, 6, 8, 10, 11, 12, 13, 15, 17, 20, 22, 23, 27, 32, 34, 35, 37, 41]
 
 game = ChineseCheckersGame()
-greedy = ForwardActor(game)
-initialize = VeryGreedyActor(game)
+greedy = GreedyAgent(game)
+initialize = InitializeAgent(game)
 
 # for new in range(10, len(versions)):
 #     print(str(new) + "/" + str(len(versions)))

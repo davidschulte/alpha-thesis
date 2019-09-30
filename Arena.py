@@ -1,57 +1,30 @@
 import numpy as np
-import itertools
 from pytorch_classification.utils import Bar, AverageMeter
-from MCTSTExperimental import MCTS
 import time
-import cProfile, pstats, io
-def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
 
-    def inner(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
 
-    return inner
-
-class Arena():
+class Arena:
     """
     An Arena class where any 2 agents can be pit against each other.
     """
-    def __init__(self, mcts1, mcts2, game, args, display=None):
+    def __init__(self, mcts1, mcts2, game, args):
         """
-        Input:
-            player 1,2: two functions that takes board as input, return action
-            game: Game object
-            display: a function that takes board as input and prints it (e.g.
-                     display in othello/OthelloGame). Is necessary for verbose
-                     mode.
 
-        see othello/OthelloPlayers.py for an example. See pit.py for pitting
-        human players/other baselines with each other.
+        :param mcts1: agent 1
+        :param mcts2: agent 2
+        :param game: game
+        :param args: arguments
         """
         self.mcts1 = mcts1
         self.mcts2 = mcts2
         self.game = game
         self.args = args
-        self.display = display
 
     def playGame(self, lonely_player, turn_lonely):
         """
-        Executes one episode of a game.
-
-        Returns:
-            either
-                winner: player who won the game (1 if player1, -1 if player2)
-            or
-                draw result returned from the game that is neither 1, -1, nor 0.
+        plays one game and returns the scores
+        :param lonely_player: denotes which agent will play with one instance
+        :param turn_lonely: denotes the player that the single instance agent is assigned to
         """
         if lonely_player == 1:
             players = [self.mcts2, self.mcts2, self.mcts2]
@@ -60,34 +33,31 @@ class Arena():
             players = [self.mcts1, self.mcts1, self.mcts1]
             players[turn_lonely] = self.mcts2
 
-        curPlayer = 1
+        cur_player = 1
         board = self.game.getInitBoard()
         it = 1
 
         scores = np.array([0, 0, 0])
-        self.game.reset_board()
+        self.game.reset_logic()
         while np.count_nonzero(scores) < 2 and it < self.args.max_steps:
 
             if it % 100 == 0:
                 print(it)
                 print(board)
 
-            if scores[curPlayer-1] == 0:
-                # canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                # s = self.game.stringRepresentation(canonicalBoard)
-                # players[curPlayer-1].Visited.append(s)
-                pi = players[curPlayer-1].getActionProb(board, curPlayer, it > 15)
+            if scores[cur_player-1] == 0:
+                pi = players[cur_player-1].get_action_prob(board, cur_player, it > 15)
                 action = np.random.choice(self.game.getActionSize(), p=pi)
                 it += 1
             else:
                 action = self.game.getActionSize()-1
 
-            valids = self.game.getValidMoves(board, curPlayer)
+            valids = self.game.getValidMoves(board, cur_player)
 
             if valids[action]==0:
                 print(action)
                 assert valids[action] >0
-            board, curPlayer = self.game.getNextState(board, curPlayer, action)
+            board, cur_player = self.game.getNextState(board, cur_player, action)
 
             scores = self.game.getGameEnded(board, False)
 
@@ -97,13 +67,9 @@ class Arena():
 
     def playGames(self, num):
         """
-        Plays num games in which player1 starts num/2 games and player2 starts
-        num/2 games.
-
-        Returns:
-            oneWon: games won by player1
-            twoWon: games won by player2
-            draws:  games won by nobody
+        plays a number of games
+        :param num: number of games, has to be divisible by 6 for fair games
+        :return: the summed scores of each agent
         """
         eps_time = AverageMeter()
         bar = Bar('Arena.playGames', max=num)
@@ -122,7 +88,7 @@ class Arena():
             for lonely_turn in range(3):
                 for _ in range(num):
                     if scores[0] < self.args.updateThreshold * max_scores and scores[1] < self.args.updateThreshold * max_scores:
-                        self.game.reset_board()
+                        self.game.reset_logic()
                         print("New Game")
                         print("Lonely Player: " + str(lonely_player))
                         print("Lonely Turn: " + str(lonely_turn+1))

@@ -86,8 +86,7 @@ ROTATION_LEFT = np.array([0, 0, 0, 0, 0, 0, 54, 0, 0,
                            0, 0, 26, 0, 0, 0, 0, 0, 0]).astype('int8')
 
 
-
-class Board():
+class Logic:
 
     def __init__(self):
         self.scores = np.array([0, 0, 0])

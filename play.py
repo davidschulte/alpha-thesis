@@ -2,14 +2,14 @@ from utils import *
 from chinese_checkers.TinyChineseCheckersGame import ChineseCheckersGame
 from chinese_checkers.tensorflow.ResNet import NNetWrapper as nn
 from chinese_checkers.Evaluator import Evaluator
-from MCTSTExperimental import MCTS
-from chinese_checkers.InitializeActor import VeryGreedyActor
-from chinese_checkers.ForwardActor import ForwardActor
+from MCTS import MCTS
+from chinese_checkers.InitializeAgent import InitializeAgent
+from chinese_checkers.GreedyAgent import GreedyAgent
 from chinese_checkers.TinyGUI import GUI
 import numpy as np
 
 args = dotdict({
-    'numMCTSSims': 200,
+    'numMCTSSims': 2,
     'cpuct': 15,
     'max_steps': 600,
 
@@ -33,8 +33,8 @@ mcts1 = MCTS(game, nn1, args)
 # nn2.load_first_checkpoint(args2.load_folder_file[0], args2.load_folder_file[1])
 
 # mcts2 = MCTS(game, nn2, args2)
-actor = VeryGreedyActor(game)
-forward = ForwardActor(game)
+actor = InitializeAgent(game)
+forward = GreedyAgent(game)
 
 evaluator = Evaluator(None, mcts1, mcts1, game, gui, True)
 scores_all = np.zeros((3, 3))

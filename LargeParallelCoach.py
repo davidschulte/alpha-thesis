@@ -1,7 +1,7 @@
 from collections import deque
 from Arena import Arena
 from ParallelMCTS import MCTS
-from MCTSTExperimental import MCTS as MCTSSingle
+from MCTS import MCTS as MCTSSingle
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
 import time, os, sys
@@ -9,7 +9,7 @@ from pickle import Pickler, Unpickler
 from random import shuffle
 import time
 import cProfile, pstats, io
-from chinese_checkers.InitializeActor import VeryGreedyActor as Actor
+from chinese_checkers.InitializeAgent import InitializeAgent as Actor
 # from chinese_checkers.RandomActor import RandomActor as Actor
 from chinese_checkers.SmallChineseCheckersGame import ChineseCheckersGame
 # from chinese_checkers.GreedyActorExperimental import GreedyActor
@@ -88,14 +88,14 @@ class Coach():
         curPlayer = 1
         episodeStep = 0
         scores = [0, 0, 0]
-        self.game.reset_board()
+        self.game.reset_logic()
 
         while np.count_nonzero(scores) < 2 and episodeStep < self.args.max_steps:
 
             if scores[curPlayer - 1] == 0:
                 episodeStep += 1
                 canonicalBoard = self.game.getCanonicalForm(board, curPlayer)
-                pi = self.greedy_actor.getActionProb(canonicalBoard, 1)
+                pi = self.greedy_actor.get_action_prob(canonicalBoard, 1)
                 # pi = self.greedy_actor.getActionProb(canonicalBoard)
 
                 trainExamples.append([canonicalBoard, curPlayer, pi, None])
