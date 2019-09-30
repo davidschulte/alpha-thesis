@@ -1,5 +1,7 @@
 # Alpha Thesis
 
+https://github.com/davidschulte/alpha-thesis/
+
 Used in thesis "Reinforcement Learning for 3-player Chinese Checkers"
 
 This project is based on the repository:
