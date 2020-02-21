@@ -1,7 +1,5 @@
 # Reinforcement Learning for 3-Player Chinese Checkers
 
-https://github.com/davidschulte/alpha-thesis/
-
 This project enables the training of an agent to play a version of the 3-player game Chinese Checkers.
 
 A further descripton of the project and a more detailed presentation of the results can be found in my Bachelor's thesis"Reinforcement Learning for 3-player Chinese Checkers". You can read it [here](https://github.com/davidschulte/alpha-thesis/blob/master/Thesis.pdf).
